@@ -1,7 +1,7 @@
 # hyperion-buildall.ps1 -- Part of Hercules-Helper
 #
 # SDL-Hercules-390 builder
-# Updated: 22 MAR 2021
+# Updated: 22 JUL 2021
 #
 # The most recent version of this project can be obtained with:
 #   git clone https://github.com/wrljet/hercules-helper.git
@@ -14,9 +14,9 @@
 #
 # Intended for Windows 10
 #    Tested on Windows 10 Home, 20H2
-#    Tested on Windows 10 Pro,  20H2
+#    Tested on Windows 10 Pro,  21H1
 #    Tested on Windows 10, Insiders Dev Edition
-#    Tested with PowerShell 5.1, and 7.1.2
+#    Tested with PowerShell 5.1, and 7.1.3
 #
 # Works with Visual Studio 2017 and 2019 Community Edition
 # in C:\Program Files (x86)\Microsoft Visual Studio\201x\Community
@@ -208,7 +208,7 @@ try {
     ##############################################################################
     # Check for existing VS2017 and required workloads
     #
-    Write-Output "Checking for existing VS2017 15.9 or VS2019 16.9 required workloads ..."
+    Write-Output "Checking for existing VS2017 15.9 or VS2019 16.10 required workloads ..."
     Write-Output ""
     WriteGreenOutput "Note: Visual Studio 2017 and 2019 will peacefully coexist."
     Write-Output ""
@@ -300,12 +300,12 @@ try {
 		    # Write-Output "15.9 version found"
 		    $workload_2017_found = $true
 		    $vs2017_found = $true
-		} elseif ($ff.StartsWith('16.9')) {
-		    # Write-Output "16.9 version found"
+		} elseif ($ff.StartsWith('16.10')) {
+		    # Write-Output "16.10 version found"
 		    $workload_2019_found = $true
 		    $vs2019_found = $true
 		} else {
-		    # Write-Output "not            : VS2017 15.9 or VS2019 16.9 version"
+		    # Write-Output "not            : VS2017 15.9 or VS2019 16.10 version"
 		}
 	    }
 
@@ -366,11 +366,11 @@ try {
         pushd .\vs2019offline\
           Write-Output "==> Run VS2019 installer to update (this will take some time)"
           $input = Read-Host -Prompt 'Press return to continue'
-          cmd /c .\vs_community_2019_16.9.31112.23.exe update --passive --norestart --wait
+          cmd /c .\vs_community_2019_16.10.31515.178.exe update --passive --norestart --wait
 
           Write-Output "==> Run VS2019 installer to add missing workloads (this will take some time)"
           $input = Read-Host -Prompt 'Press return to continue'
-          cmd /c .\vs_community_2019_16.9.31112.23.exe --passive --norestart --wait
+          cmd /c .\vs_community_2019_16.10.31515.178.exe --passive --norestart --wait
         popd
         Write-Output ""
     } else {
