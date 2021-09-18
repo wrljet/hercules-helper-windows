@@ -13,7 +13,7 @@
 # Bill Lewis  bill@wrljet.com
 #
 # Intended for Windows 10
-#    Tested on Windows 10 Home, 20H2
+#    Tested on Windows 10 Home, 21H1
 #    Tested on Windows 10 Pro,  21H1
 #    Tested on Windows 10, Insiders Dev Edition
 #    Tested with PowerShell 5.1, and 7.1.3
@@ -350,7 +350,7 @@ try {
         Write-Output "==> Run VS2017 installer (this will take some time)"
         $input = Read-Host -Prompt 'Press return to continue'
         pushd .\vs2017offline\
-          cmd /c .\vs_community_2017_15.9.28307.1342.exe --passive --norestart --wait
+          cmd /c .\vs_community_2017_15.9.28307.1684.exe --passive --norestart --wait
         popd
         Write-Output ""
     } elseif ($vs_2019_missing -And $VS2019.IsPresent -And !$SkipVS.IsPresent) {

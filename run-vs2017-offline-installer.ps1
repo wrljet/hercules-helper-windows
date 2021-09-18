@@ -15,5 +15,5 @@
 # Run offline installer for Visual Studio 2017
 
 pushd .\vs2017offline\
-    cmd /c .\vs_community_2017_15.9.28307.1342.exe --passive --norestart --wait
+    cmd /c .\vs_community_2017_15.9.28307.1684.exe --passive --norestart --wait
 popd

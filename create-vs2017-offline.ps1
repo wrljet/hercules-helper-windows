@@ -14,7 +14,7 @@
 #
 # Create an offline installer for Visual Studio 2017
 
-cmd /c .\goodies\msft\vs_community_2017_15.9.28307.1342.exe `
+cmd /c .\goodies\msft\vs_community_2017_15.9.28307.1684.exe `
     --wait --passive --layout .\vs2017offline --lang en-US `
     --add Microsoft.VisualStudio.Workload.NativeDesktop `
     --add Microsoft.Component.VC.Runtime.UCRTSDK `
