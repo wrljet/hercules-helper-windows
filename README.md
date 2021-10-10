@@ -53,7 +53,7 @@ Close the PowerShell window.
 
 Get the Hercules-Helper project onto your system.
 
-This can be down by navigating a web browser to GitHub and downloading
+This can be done by navigating a web browser to GitHub and downloading
 from there.  Put the zipfile in a convenient place on your filesystem.
 
 Sometimes when files are copied to Windows, it will decide they have
@@ -107,7 +107,7 @@ From here on everything should be completely automatic.
 You will be prompted to hit the Enter key a number of times,
 with prompts informing you what the next part of the process
 will be.  And you will need to answer Yes to Admin rights for
-a few of the operations.  Part way thought, it will shift from
+a few of the operations.  Part way through, it will shift from
 PowerShell to a "DOS" command shell to run the actual builder.
 
 If anything seems to go wrong, please stop and ask questions at that point.
