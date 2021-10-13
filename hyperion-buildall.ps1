@@ -1,7 +1,7 @@
 # hyperion-buildall.ps1 -- Part of Hercules-Helper
 #
 # SDL-Hercules-390 builder
-# Updated: 18 SEP 2021
+# Updated: 13 OCT 2021
 #
 # The most recent version of this project can be obtained with:
 #   git clone https://github.com/wrljet/hercules-helper.git
@@ -12,10 +12,10 @@
 #
 # Bill Lewis  bill@wrljet.com
 #
-# Intended for Windows 10
-#    Tested on Windows 10 Home, 21H1
-#    Tested on Windows 10 Pro,  21H1
-#    Tested with PowerShell 5.1, and 7.1.3
+# Tested on Windows 11 Pro,  21H2, 13 OCT 2021
+# Tested on Windows 10 Home, 21H1
+# Tested on Windows 10 Pro,  21H1
+# Tested with PowerShell 5.1, and 7.1.3
 #
 # Works with Visual Studio 2017 and 2019 Community Edition
 # in C:\Program Files (x86)\Microsoft Visual Studio\201x\Community
@@ -349,7 +349,7 @@ try {
         Write-Output "==> Run VS2017 installer (this will take some time)"
         $input = Read-Host -Prompt 'Press return to continue'
         pushd .\vs2017offline\
-          cmd /c .\vs_community_2017_15.9.28307.1684.exe --passive --norestart --wait
+          cmd /c .\vs_community_2017_15.9.28307.1705.exe --passive --norestart --wait
         popd
         Write-Output ""
     } elseif ($vs_2019_missing -And $VS2019.IsPresent -And !$SkipVS.IsPresent) {
@@ -365,11 +365,11 @@ try {
         pushd .\vs2019offline\
           Write-Output "==> Run VS2019 installer to update (this will take some time)"
           $input = Read-Host -Prompt 'Press return to continue'
-          cmd /c .\vs_community_2019_16.11.31702.278.exe update --passive --norestart --wait
+          cmd /c .\vs_community_2019_16.11.31729.503.exe update --passive --norestart --wait
 
           Write-Output "==> Run VS2019 installer to add missing workloads (this will take some time)"
           $input = Read-Host -Prompt 'Press return to continue'
-          cmd /c .\vs_community_2019_16.11.31702.278.exe --passive --norestart --wait
+          cmd /c .\vs_community_2019_16.11.31729.503.exe --passive --norestart --wait
         popd
         Write-Output ""
     } else {
@@ -394,7 +394,7 @@ try {
     $input = Read-Host -Prompt 'Press return to continue'
 
     $props_dir = "$HOME\AppData\Local\Microsoft\MSBuild\v4.0"
-    Write-Output "VS2017 User Properties directory: $props_dir"
+    Write-Output "VS2017/VS2019 User Properties directory: $props_dir"
 
     $dir = (New-Item -ItemType Directory -Force -Path "$props_dir").ToString()
 
