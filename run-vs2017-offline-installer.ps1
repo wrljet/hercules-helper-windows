@@ -1,7 +1,7 @@
 # run-vs2017-offline.ps1 -- Part of Hercules-Helper
 #
 # SDL-Hercules-390 builder
-# Updated: 12 OCT 2021
+# Updated: 2 DEC 2021
 #
 # The most recent version of this project can be obtained with:
 #   git clone https://github.com/wrljet/hercules-helper.git
@@ -15,5 +15,5 @@
 # Run offline installer for Visual Studio 2017
 
 pushd .\vs2017offline\
-    cmd /c .\vs_community_2017_15.9.28307.1705.exe --passive --norestart --wait
+    cmd /c .\vs_community.exe --passive --norestart --wait
 popd

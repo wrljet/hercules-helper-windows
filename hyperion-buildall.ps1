@@ -1,7 +1,7 @@
 # hyperion-buildall.ps1 -- Part of Hercules-Helper
 #
 # SDL-Hercules-390 builder
-# Updated: 13 OCT 2021
+# Updated: 4 DEC 2021
 #
 # The most recent version of this project can be obtained with:
 #   git clone https://github.com/wrljet/hercules-helper.git
@@ -12,12 +12,12 @@
 #
 # Bill Lewis  bill@wrljet.com
 #
-# Tested on Windows 11 Pro,  21H2, 13 OCT 2021
-# Tested on Windows 10 Home, 21H1
-# Tested on Windows 10 Pro,  21H1
-# Tested with PowerShell 5.1, and 7.1.3
+# Intended for Windows 10
+#    Tested on Windows 10 Home, 21H1
+#    Tested on Windows 10 Pro,  21H1
+#    Tested with PowerShell 5.1, and 7.1.3
 #
-# Works with Visual Studio 2017 and 2019 Community Edition
+# Works with Visual Studio 2017, 2019, and 2022 Community Edition
 # in C:\Program Files (x86)\Microsoft Visual Studio\201x\Community
 
 # Set-PSDebug -Trace 1
@@ -38,6 +38,9 @@ Param (
 
     [Parameter(Mandatory = $false)]
 	[Switch]$VS2019,
+
+    [Parameter(Mandatory = $false)]
+	[Switch]$VS2022,
 
     [Parameter(Mandatory = $false)]
 	[String]$BuildDir,
@@ -140,16 +143,18 @@ try {
         Write-Output "-SkipVS: Skipping Visual Studio installation/update"
     }
 
-    if (! $VS2017.IsPresent -And ! $VS2019.IsPresent) {
-        Write-Error "Error: Must specify either -VS2017 or -VS2019 option"
+    if ($VS2017.IsPresent + $VS2019.IsPresent + $VS2022.IsPresent -Eq 0) {
+        Write-Error "Error: Must specify either -VS2017, -VS2019, or -VS2022 option"
         Exit 3
-    } elseif ($VS2017.IsPresent -And $VS2019.IsPresent) {
-        Write-Error "Error: Cannot specify both -VS2017 and -VS2019 options together"
+    } elseif ($VS2017.IsPresent + $VS2019.IsPresent + $VS2022.IsPresent -Gt 1) {
+        Write-Error "Error: Cannot specify multiple -VS2017, -VS2019, and -VS2022 options together"
         Exit 3
     } elseif ($VS2017.IsPresent) {
         Write-Output "-VS2017  : Using Visual Studio 2017 installation/update"
     } elseif ($VS2019.IsPresent) {
         Write-Output "-VS2019  : Using Visual Studio 2019 installation/update"
+    } elseif ($VS2022.IsPresent) {
+        Write-Output "-VS2022  : Using Visual Studio 2022 installation/update"
     }
 
     Write-Output "-BuildDir: $BuildDir"
@@ -207,9 +212,9 @@ try {
     ##############################################################################
     # Check for existing VS2017 and required workloads
     #
-    Write-Output "Checking for existing VS2017 15.9 or VS2019 16.11 required workloads ..."
+    Write-Output "Checking for existing VS2017 15.9, VS2019 16.11, or VS2022 17.0 required workloads ..."
     Write-Output ""
-    WriteGreenOutput "Note: Visual Studio 2017 and 2019 will peacefully coexist."
+    WriteGreenOutput "Note: Visual Studio 2017, 2019, and 2022 will peacefully coexist."
     Write-Output ""
 
     # From:
@@ -260,12 +265,33 @@ try {
 	'Microsoft.VisualStudio.Component.NuGet', `
         'Component.GitHub.VisualStudio'
 
+    $workloads_2022 = `
+        'Microsoft.VisualStudio.ComponentGroup.NativeDesktop.Core', `
+        'Microsoft.VisualStudio.ComponentGroup.WebToolsExtensions.CMake', `
+        'Microsoft.VisualStudio.Workload.CoreEditor', `
+        'Microsoft.VisualStudio.Workload.NativeDesktop', `
+        'Microsoft.VisualStudio.Component.CoreEditor', `
+        'Microsoft.VisualStudio.Component.Roslyn.Compiler', `
+        'Microsoft.Component.MSBuild', `
+        'Microsoft.VisualStudio.Component.TextTemplating', `
+        'Microsoft.VisualStudio.Component.Debugger.JustInTime', `
+        'Microsoft.VisualStudio.Component.VC.CoreIde', `
+        'Microsoft.VisualStudio.Component.VC.Tools.x86.x64', `
+        'Microsoft.VisualStudio.Component.Windows10SDK.19041', `
+        'Microsoft.VisualStudio.Component.VC.Redist.14.Latest', `
+        'Microsoft.VisualStudio.Component.VC.CMake.Project', `
+        'Microsoft.Component.VC.Runtime.UCRTSDK', `
+        'Microsoft.VisualStudio.Component.Git', `
+        'Microsoft.VisualStudio.Component.WinXP'
+
     if ($VS2017.IsPresent) {
         $workloads = $workloads_2017
     } elseif ($VS2019.IsPresent) {
         $workloads = $workloads_2019
+    } elseif ($VS2022.IsPresent) {
+        $workloads = $workloads_2022
     } else {
-        Write-Error "Error: Inconsistent VS2017/VS2019 options"
+        Write-Error "Error: Inconsistent VS2017/VS2019/VS2022 options"
 	Exit 3
     }
 
@@ -273,12 +299,15 @@ try {
 
     $vs_2017_missing = $false
     $vs_2019_missing = $false
+    $vs_2022_missing = $false
     foreach ($workload in $workloads)
     {
         $vs2017_found = $false
         $vs2019_found = $false
+        $vs2022_found = $false
         $workload_2017_found = $false
         $workload_2019_found = $false
+        $workload_2022_found = $false
 
         $found = (Get-VSSetupInstance -All | Select-VSSetupInstance -Require "$workload" -Version '[15.9,)')
 
@@ -287,6 +316,7 @@ try {
 		"missing        : $workload"
 	    $vs_2017_missing = $true
 	    $vs_2019_missing = $true
+	    $vs_2022_missing = $true
 	} else {
 	    foreach ($f in $found) {
 		# echo $workload
@@ -303,8 +333,12 @@ try {
 		    # Write-Output "16.11 version found"
 		    $workload_2019_found = $true
 		    $vs2019_found = $true
+		} elseif ($ff.StartsWith('17.0')) {
+		    # Write-Output "17.0 version found"
+		    $workload_2022_found = $true
+		    $vs2022_found = $true
 		} else {
-		    # Write-Output "not            : VS2017 15.9 or VS2019 16.11 version"
+		    # Write-Output "not            : VS2017 15.9, VS2019 16.11, or VS2022 17.0 version"
 		}
 	    }
 
@@ -318,6 +352,12 @@ try {
 		$vs_2019_missing = $true
 		WriteCustomOutput -ForegroundColor Yellow -BackgroundColor Black -Message `
 		    "missing VS2019 : $workload"
+	    }
+
+	    if ($VS2022.IsPresent -And !$workload_2022_found) {
+		$vs_2022_missing = $true
+		WriteCustomOutput -ForegroundColor Yellow -BackgroundColor Black -Message `
+		    "missing VS2022 : $workload"
 	    }
 	}
     }
@@ -334,6 +374,12 @@ try {
     } elseif ($VS2019.IsPresent) {
         WriteGreenOutput "All required VS2019 workloads are present."
     }
+
+    if ($VS2022.IsPresent -And $vs_2022_missing) {
+        Write-Output "Some required VS2022 workloads are missing, and can be automatically installed."
+    } elseif ($VS2022.IsPresent) {
+        WriteGreenOutput "All required VS2022 workloads are present."
+    }
     Write-Output ""
 
     ##############################################################################
@@ -349,7 +395,7 @@ try {
         Write-Output "==> Run VS2017 installer (this will take some time)"
         $input = Read-Host -Prompt 'Press return to continue'
         pushd .\vs2017offline\
-          cmd /c .\vs_community_2017_15.9.28307.1705.exe --passive --norestart --wait
+          cmd /c .\vs_community.exe --passive --norestart --wait
         popd
         Write-Output ""
     } elseif ($vs_2019_missing -And $VS2019.IsPresent -And !$SkipVS.IsPresent) {
@@ -365,11 +411,31 @@ try {
         pushd .\vs2019offline\
           Write-Output "==> Run VS2019 installer to update (this will take some time)"
           $input = Read-Host -Prompt 'Press return to continue'
-          cmd /c .\vs_community_2019_16.11.31729.503.exe update --passive --norestart --wait
+          cmd /c .\vs_community.exe update --passive --norestart --wait
 
           Write-Output "==> Run VS2019 installer to add missing workloads (this will take some time)"
           $input = Read-Host -Prompt 'Press return to continue'
-          cmd /c .\vs_community_2019_16.11.31729.503.exe --passive --norestart --wait
+          cmd /c .\vs_community.exe --passive --norestart --wait
+        popd
+        Write-Output ""
+    } elseif ($vs_2022_missing -And $VS2022.IsPresent -And !$SkipVS.IsPresent) {
+        Write-Output "==> Create/update VS2022 installer (this will take some time)"
+        $input = Read-Host -Prompt 'Press return to continue'
+
+        # Create an offline installer for Visual Studio 2022
+        .\create-vs2022-offline.ps1
+        Write-Output ""
+
+        Write-Output "==> VS2022 will require updating.  Ctrl+C now if you don't want that."
+
+        pushd .\vs2022offline\
+          Write-Output "==> Run VS2022 installer to update (this will take some time)"
+          $input = Read-Host -Prompt 'Press return to continue'
+          cmd /c .\vs_community.exe update --passive --norestart --wait
+
+          Write-Output "==> Run VS2022 installer to add missing workloads (this will take some time)"
+          $input = Read-Host -Prompt 'Press return to continue'
+          cmd /c .\vs_community.exe --passive --norestart --wait
         popd
         Write-Output ""
     } else {
@@ -386,15 +452,18 @@ try {
     } elseif ($VS2019.IsPresent) {
 	$vcvars_cmd = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
 	Write-Output "==> Creating VS2019 user property directory if missing"
+    } elseif ($VS2022.IsPresent) {
+	$vcvars_cmd = "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+	Write-Output "==> Creating VS2022 user property directory if missing"
     } else {
-        Write-Error "Error: Inconsistent VS2017/VS2019 options"
+        Write-Error "Error: Inconsistent VS2017/VS2019/VS2022 options"
 	Exit 3
     }
 
     $input = Read-Host -Prompt 'Press return to continue'
 
     $props_dir = "$HOME\AppData\Local\Microsoft\MSBuild\v4.0"
-    Write-Output "VS2017/VS2019 User Properties directory: $props_dir"
+    Write-Output "Visual Studio User Properties directory: $props_dir"
 
     $dir = (New-Item -ItemType Directory -Force -Path "$props_dir").ToString()
 
