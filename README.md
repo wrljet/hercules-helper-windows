@@ -28,7 +28,7 @@ Windows will prompt for your permissions where required.
 
 This PowerShell script will perform a complete build of Hercules and its external
 packages, and run all the automated tests.  It will also install Visual Studio
-2017 or 2019, or update an existing Visual Studio installation to add only
+2017, 2019, or 2022, or update an existing Visual Studio installation to add only
 any require workloads that are missing.
 
 The full process is:
@@ -95,7 +95,7 @@ Hercules-Helper.  And cd into the windows subdirectory.
 
 Decide where you want Hercules to be built.  In this example I am using C:\hercules.
 
-Decide if you prefer to use Visual Studio 2017 or 2019.
+Decide if you prefer to use Visual Studio 2017, 2019, or 2022.
 
 ```
 cd c:\hercules-helper\windows
