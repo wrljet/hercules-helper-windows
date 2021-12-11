@@ -1,7 +1,7 @@
 # hyperion-buildall.ps1 -- Part of Hercules-Helper
 #
 # SDL-Hercules-390 builder
-# Updated: 4 DEC 2021
+# Updated: 11 DEC 2021
 #
 # The most recent version of this project can be obtained with:
 #   git clone https://github.com/wrljet/hercules-helper.git
@@ -15,6 +15,7 @@
 # Intended for Windows 10
 #    Tested on Windows 10 Home, 21H1
 #    Tested on Windows 10 Pro,  21H1
+#    Tested in Windows 7 Enterprise
 #    Tested with PowerShell 5.1, and 7.1.3
 #
 # Works with Visual Studio 2017, 2019, and 2022 Community Edition
@@ -172,6 +173,8 @@ try {
     $goodies_dir = Resolve-Path "$goodies_dir"
     Write-Output "goodies_dir        : $goodies_dir"
 
+    $unzip_exe = "$goodies_dir\gnu\unzip.exe"
+    Write-Output "unzip.exe           : $unzip_exe"
     $wget_exe = "$goodies_dir\gnu\wget.exe"
     Write-Output "wget.exe           : $wget_exe"
     Write-Output ""
@@ -565,7 +568,7 @@ try {
         if (!(Test-Path 'bzip2')) {
             $dir = New-Item bzip2 -ItemType Directory -ErrorAction SilentlyContinue
             pushd bzip2
-                $cmd = "tar -xf ..\BZIP2-1.0.6-bin-lib-inc-vc2008-x86-x64.zip 2>&1"
+                $cmd = "$unzip_exe ..\BZIP2-1.0.6-bin-lib-inc-vc2008-x86-x64.zip 2>&1"
                 Write-Output $cmd
                 Invoke-Expression -Command "$cmd"
             popd # winbuild
@@ -576,7 +579,7 @@ try {
         if (!(Test-Path 'zlib')) {
             $dir = New-Item zlib -ItemType Directory -ErrorAction SilentlyContinue
             pushd zlib
-                $cmd = "tar -xf ..\ZLIB1-1.2.11-bin-lib-inc-vc2008-x86-x64.zip 2>&1"
+                $cmd = "$unzip_exe ..\ZLIB1-1.2.11-bin-lib-inc-vc2008-x86-x64.zip 2>&1"
                 Write-Output $cmd
                 Invoke-Expression -Command "$cmd"
             popd # winbuild
@@ -587,7 +590,7 @@ try {
         if (!(Test-Path 'pcre')) {
             $dir = New-Item pcre -ItemType Directory -ErrorAction SilentlyContinue
             pushd pcre
-                $cmd = "tar -xf ..\PCRE-6.4.1-bin-lib-inc-vc2008-x86-x64.zip 2>&1"
+                $cmd = "$unzip_exe ..\PCRE-6.4.1-bin-lib-inc-vc2008-x86-x64.zip 2>&1"
                 Write-Output $cmd
                 Invoke-Expression -Command "$cmd"
             popd # winbuild
