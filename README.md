@@ -1,4 +1,4 @@
-# Hercules-Helper (Windows 10 version)
+# Hercules-Helper (Windows 10 64-bit version)
 
 (preliminary Windows instructions)
 
