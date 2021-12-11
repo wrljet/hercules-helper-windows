@@ -24,6 +24,9 @@ than sorry.  BACK UP YOUR SYSTEM before running any of this!
 **Please do not run this entire process as Administrator.  That can be damaging.
 Windows will prompt for your permissions where required.**
 
+(I don't really support Windows 7, but it does seem to work with PowerShell 5.1
+and VS2017)
+
 ## hyperion-buildall.ps1
 
 This PowerShell script will perform a complete build of Hercules and its external
@@ -42,6 +45,11 @@ PowerShell releases may be found in the Microsoft GitHub repo:
     https://github.com/PowerShell/PowerShell/releases
 ```
 
+For Windows 7, PowerShell 5.1 may be found here:
+```
+    https://www.microsoft.com/en-us/download/details.aspx?id=54616&6B49FDFB-8E5B-4B07-BC31-15695C5A2143=1
+```
+
 Out of the box, a fresh Windows 10 installation will not allow you to run
 PowerShell scripts, for security reasons.  We need to relax that.
 This step will only need to be performed once, the first time you
@@ -53,6 +61,11 @@ Open a PowerShell prompt "As Administrator", and run:
 Set-ExecutionPolicy RemoteSigned
 ```
 Answer Yes when prompted.
+
+For Windows 7 and PowerShell 5.1, also run:
+```
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+```
 
 Close the PowerShell window.
 
