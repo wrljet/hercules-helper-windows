@@ -21,8 +21,8 @@ Report errors in this to me so everyone can benefit.
 Every attempt has been made to test this process, but better to be safe
 than sorry.  BACK UP YOUR SYSTEM before running any of this!
 
-Please do not run this entire process as Administrator.  That can be damaging.
-Windows will prompt for your permissions where required.
+**Please do not run this entire process as Administrator.  That can be damaging.
+Windows will prompt for your permissions where required.**
 
 ## hyperion-buildall.ps1
 
@@ -34,6 +34,13 @@ any require workloads that are missing.
 The full process is:
 
 ### Step 1:
+
+You will need a modern version of PowerShell, such as version 7.x.
+PowerShell releases may be found in the Microsoft GitHub repo:
+
+```
+    https://github.com/PowerShell/PowerShell/releases
+```
 
 Out of the box, a fresh Windows 10 installation will not allow you to run
 PowerShell scripts, for security reasons.  We need to relax that.
