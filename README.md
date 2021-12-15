@@ -99,7 +99,7 @@ After building Hercules, this process will run the automated tests.
 Doing so requires REXX support.  So REXX must be installed before
 we get to that point.  We will install ooRexx.
 
-Navigate to hercules-helper\windows\goodies, where you will find
+Navigate to hercules-helper-windows\goodies, where you will find
 the ooRexx-4.2.0.windows.x86_64.exe installer.
 
 Run the installer.  I've found just accepting all the defaults
@@ -118,7 +118,7 @@ Decide where you want Hercules to be built.  In this example I am using C:\hercu
 Decide if you prefer to use Visual Studio 2017, 2019, or 2022.
 
 ```
-cd c:\hercules-helper\windows
+cd c:\hercules-helper-windows
 .\hyperion-buildall.ps1 -VS2017 -BuildDir c:\hercules
 ```
 
