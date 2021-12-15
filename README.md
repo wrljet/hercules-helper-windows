@@ -45,7 +45,7 @@ PowerShell releases may be found in the Microsoft GitHub repo:
     https://github.com/PowerShell/PowerShell/releases
 ```
 
-For Windows 7, PowerShell 5.1 may be found here:
+For Windows 7, PowerShell 5.1 may be found here (note: link may only work with Microsft Edge or IE):
 ```
     https://www.microsoft.com/en-us/download/details.aspx?id=54616&6B49FDFB-8E5B-4B07-BC31-15695C5A2143=1
 ```
