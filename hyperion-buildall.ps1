@@ -1,7 +1,7 @@
 # hyperion-buildall.ps1 -- Part of Hercules-Helper
 #
 # SDL-Hercules-390 builder
-# Updated: 11 DEC 2021
+# Updated: 16 DEC 2021
 #
 # The most recent version of this project can be obtained with:
 #   git clone https://github.com/wrljet/hercules-helper.git
@@ -85,6 +85,13 @@ Function WriteGreenOutput($message)
 }
 
 ##############################################################################
+
+$ver = $psversiontable.PSVersion
+if ([System.Version]$ver -lt [System.Version]"5.1.0.0") {
+    Write-Output "Powershell : $ver is too old.  5.1 is the minimum version."
+    Exit 3
+}
+
 # Wrap everything in try/catch so we can stop the transcript
 try {
     $startup_dir = Convert-Path .
