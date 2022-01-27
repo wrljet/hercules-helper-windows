@@ -1,7 +1,7 @@
 # hyperion-buildall.ps1 -- Part of Hercules-Helper
 #
 # SDL-Hercules-390 builder
-# Updated: 16 DEC 2021
+# Updated: 27 JAN 2022
 #
 # The most recent version of this project can be obtained with:
 #   git clone https://github.com/wrljet/hercules-helper.git
@@ -181,7 +181,7 @@ try {
     Write-Output "goodies_dir        : $goodies_dir"
 
     $unzip_exe = "$goodies_dir\gnu\unzip.exe"
-    Write-Output "unzip.exe           : $unzip_exe"
+    Write-Output "unzip.exe          : $unzip_exe"
     $wget_exe = "$goodies_dir\gnu\wget.exe"
     Write-Output "wget.exe           : $wget_exe"
     Write-Output ""
@@ -190,6 +190,7 @@ try {
     $sLogName = 'logfile.log'
     $sLogFile = Join-Path -Path $sLogPath -ChildPath $sLogName
 
+    ##############################################################################
     if (Test-Path 'env:REXX_HOME') {
         Write-Output "REXX_HOME is $env:REXX_HOME"
     } else {
@@ -210,6 +211,57 @@ try {
     }
     Write-Output ""
 
+    ##############################################################################
+    # Check if there are already environment variables for the winbuild packages
+    # and if so, that they point to the correct place.
+    #
+    # e.g. $hercules_dir\hyperion\winbuild\bzip2
+    #
+
+    $bzip2_dir_bad = $false
+    $pcre_dir_bad  = $false
+    $zlib_dir_bad  = $false
+
+    if (Test-Path 'env:BZIP2_DIR') {
+        Write-Output "BZIP2_DIR is $env:BZIP2_DIR"
+        $winbuild_bzip2_dir = Resolve-Path "$hercules_dir\hyperion\winbuild\bzip2"
+        Write-Output "winbuild bzip2 dir : $winbuild_bzip2_dir"
+        if ( $env:BZIP2_DIR -ine $winbuild_bzip2_dir ) {
+            $bzip2_dir_bad = $true
+            Write-Error "Pre-existing BZIP2_DIR environment variable points to the wrong directory"
+            Write-Output ""
+        }
+    }
+
+    if (Test-Path 'env:PCRE_DIR') {
+        Write-Output "PCRE_DIR is $env:PCRE_DIR"
+        $winbuild_pcre_dir = Resolve-Path "$hercules_dir\hyperion\winbuild\pcre"
+        Write-Output "winbuild pcre dir : $winbuild_pcre_dir"
+        if ( $env:PCRE_DIR -ine $winbuild_pcre_dir ) {
+            $pcre_dir_bad = $true
+            Write-Error "Pre-existing PCRE_DIR environment variable points to the wrong directory"
+            Write-Output ""
+        }
+    }
+
+    if (Test-Path 'env:ZLIB_DIR') {
+        Write-Output "ZLIB_DIR is $env:ZLIB_DIR"
+        $winbuild_zlib_dir = Resolve-Path "$hercules_dir\hyperion\winbuild\zlib"
+        Write-Output "winbuild zlib dir : $winbuild_zlib_dir"
+        if ( $env:ZLIB_DIR -ine $winbuild_zlib_dir ) {
+            $zlib_dir_bad = $true
+            Write-Error "Pre-existing ZLIB_DIR environment variable points to the wrong directory"
+            Write-Output ""
+        }
+    }
+
+    if ($bzip2_dir_bad || $pcre_dir_bad || $zlib_dir_bad) {
+	Exit 3
+    } else {
+        Write-Output ""
+    }
+
+    ##############################################################################
     Write-Output "System Information:"
     (systeminfo /fo csv | ConvertFrom-Csv | select 'OS Name', 'OS Version' | Format-List | Out-String).Trim()
     $ver = $psversiontable.PSVersion.ToString()
