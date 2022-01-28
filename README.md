@@ -121,6 +121,8 @@ Decide if you prefer to use Visual Studio 2017, 2019, or 2022.
 cd c:\hercules-helper-windows
 .\hyperion-buildall.ps1 -VS2017 -BuildDir c:\hercules
 ```
+If the ```-Firewall `` option is specified, Windows Firewall rules
+to allow Hercules will be added.
 
 From here on everything should be completely automatic.
 

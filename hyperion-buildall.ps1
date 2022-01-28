@@ -1,7 +1,7 @@
 # hyperion-buildall.ps1 -- Part of Hercules-Helper
 #
 # SDL-Hercules-390 builder
-# Updated: 27 JAN 2022
+# Updated: 28 JAN 2022
 #
 # The most recent version of this project can be obtained with:
 #   git clone https://github.com/wrljet/hercules-helper.git
@@ -15,7 +15,8 @@
 # Intended for Windows 10
 #    Tested on Windows 10 Home, 21H1
 #    Tested on Windows 10 Pro,  21H1
-#    Tested in Windows 7 Enterprise
+#    Works  on Windows 7 Enterprise (not routinely tested)
+#    Works  on Windows 11 (not routinely tested)
 #    Tested with PowerShell 5.1, and 7.1.3
 #
 # Works with Visual Studio 2017, 2019, and 2022 Community Edition
@@ -45,6 +46,9 @@ Param (
 
     [Parameter(Mandatory = $false)]
 	[String]$BuildDir,
+
+    [Parameter(Mandatory = $false)]
+        [Switch]$Firewall,
 
     [Parameter(Mandatory = $false)]
         [Switch]$ColorText
@@ -163,6 +167,12 @@ try {
         Write-Output "-VS2019  : Using Visual Studio 2019 installation/update"
     } elseif ($VS2022.IsPresent) {
         Write-Output "-VS2022  : Using Visual Studio 2022 installation/update"
+    }
+
+    if ($Firewall.IsPresent) {
+        Write-Output "-Firewall: firewall rules will be updated"
+    } else {
+        Write-Output "         : firewall rules will not be updated"
     }
 
     Write-Output "-BuildDir: $BuildDir"
@@ -677,44 +687,47 @@ try {
     Write-Output ""
 
     ##############################################################################
-    Write-Output '==> Windows Firewall rules - Press return to continue'
-    $input = Read-Host -Prompt 'Press return to continue'
+    if ($Firewall.IsPresent) {
+        Write-Output '==> Windows Firewall rules - Press return to continue'
+        $input = Read-Host -Prompt 'Press return to continue'
 
-    $hercules_exedir = Resolve-Path "$hercules_dir\hyperion\msvc.AMD64.bin"
-    # Write-Output "Hercules exe directory : $hercules_exedir"
-    $hercules_exe = "$hercules_exedir\hercules.exe"
+        $hercules_exedir = Resolve-Path "$hercules_dir\hyperion\msvc.AMD64.bin"
+        # Write-Output "Hercules exe directory : $hercules_exedir"
+        $hercules_exe = "$hercules_exedir\hercules.exe"
 
-    if (!(Test-Path -Path "$hercules_exe" -PathType leaf )) {
-	WriteGreenOutput "$hercules_exe does not exist.  Skipping firewall rules."
-    } else {
-        Write-Output ""
-        Write-Output "Checking for existing Hercules firewall rules... (this may take a while)"
-
-        # $r = Get-NetFirewallRule -DisplayName 'The Hercules 390 Emulator' 2> $null; 
-        $r = (( (Get-NetFirewallRule  | Get-NetFirewallApplicationFilter).Program ) -match 'hercules.exe').Length
-
-        if ($r -gt 0) { 
-            Write-Output "Existing 'hercules.exe' firewall rules found.  Skipping"; 
-        } else { 
-            Write-Output "Existing 'hercules.exe' firewall rules NOT found."; 
+        if (!(Test-Path -Path "$hercules_exe" -PathType leaf )) {
+            WriteGreenOutput "$hercules_exe does not exist.  Skipping firewall rules."
+        } else {
             Write-Output ""
+            Write-Output "Checking for existing Hercules firewall rules... (this may take a while)"
 
-            do { $input = Read-Host -Prompt "Create Windows Firewall rule for Hercules? [y/N]" }
-            until ("", "yes", "no", "YES", "NO", "y", "Y", "n", "N" -ccontains $input)
+            # $r = Get-NetFirewallRule -DisplayName 'The Hercules 390 Emulator' 2> $null; 
+            $r = (( (Get-NetFirewallRule  | Get-NetFirewallApplicationFilter).Program ) -match 'hercules.exe').Length
 
-            if ( $input.ToLower() -eq 'y') {
-                WriteGreenOutput "This phase will not be logged (due to Administrator rights)."
-
-                $pwd_dir = Resolve-Path "."
-                Start-Process -Wait powershell -Verb RunAs -ArgumentList "-file $pwd_dir\setup-firewall-rules.ps1 $hercules_exe"
-
+            if ($r -gt 0) { 
+                Write-Output "Existing 'hercules.exe' firewall rules found.  Skipping"; 
+            } else { 
+                Write-Output "Existing 'hercules.exe' firewall rules NOT found."; 
                 Write-Output ""
-                Write-Output "Windows Firewall rules have been created."
-                $input = Read-Host -Prompt 'Press return to continue'
+
+                do { $input = Read-Host -Prompt "Create Windows Firewall rule for Hercules? [y/N]" }
+                until ("", "yes", "no", "YES", "NO", "y", "Y", "n", "N" -ccontains $input)
+
+                if ( $input.ToLower() -eq 'y') {
+                    WriteGreenOutput "This phase will not be logged (due to Administrator rights)."
+
+                    $pwd_dir = Resolve-Path "."
+                    Start-Process -Wait powershell -Verb RunAs -ArgumentList "-file $pwd_dir\setup-firewall-rules.ps1 $hercules_exe"
+
+                    Write-Output ""
+                    Write-Output "Windows Firewall rules have been created."
+                    $input = Read-Host -Prompt 'Press return to continue'
+                }
             }
         }
     }
 
+    ##############################################################################
     Write-Output ""
     WriteGreenOutput "Done!"
     Write-Output ""
