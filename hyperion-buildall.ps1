@@ -1,7 +1,7 @@
 # hyperion-buildall.ps1 -- Part of Hercules-Helper
 #
 # SDL-Hercules-390 builder
-# Updated: 28 JAN 2022
+# Updated: 07 FEB 2022
 #
 # The most recent version of this project can be obtained with:
 #   git clone https://github.com/wrljet/hercules-helper.git
@@ -265,7 +265,7 @@ try {
         }
     }
 
-    if ($bzip2_dir_bad || $pcre_dir_bad || $zlib_dir_bad) {
+    if ($bzip2_dir_bad -or $pcre_dir_bad -or $zlib_dir_bad) {
 	Exit 3
     } else {
         Write-Output ""
