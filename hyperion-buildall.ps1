@@ -1,23 +1,23 @@
 # hyperion-buildall.ps1 -- Part of Hercules-Helper
 #
 # SDL-Hercules-390 builder
-# Updated: 07 FEB 2022
+# Updated: 08 JUN 2022
 #
 # The most recent version of this project can be obtained with:
-#   git clone https://github.com/wrljet/hercules-helper.git
+#   git clone https://github.com/wrljet/hercules-helper-windows.git
 # or:
-#   wget https://github.com/wrljet/hercules-helper/archive/master.zip
+#   wget https://github.com/wrljet/hercules-helper-windows/archive/master.zip
 #
 # Please report errors in this to me so everyone can benefit.
 #
 # Bill Lewis  bill@wrljet.com
 #
 # Intended for Windows 10
-#    Tested on Windows 10 Home, 21H1
-#    Tested on Windows 10 Pro,  21H1
+#    Tested on Windows 10 Pro,  21H2
+#    Works  on Windows 10 Home, 21H1 (not routinely tested)
 #    Works  on Windows 7 Enterprise (not routinely tested)
 #    Works  on Windows 11 (not routinely tested)
-#    Tested with PowerShell 5.1, and 7.1.3
+#    Tested with PowerShell 5.1, 7.1.3, and 7.2.4
 #
 # Works with Visual Studio 2017, 2019, and 2022 Community Edition
 # in C:\Program Files (x86)\Microsoft Visual Studio\201x\Community
@@ -46,6 +46,9 @@ Param (
 
     [Parameter(Mandatory = $false)]
 	[String]$BuildDir,
+
+    [Parameter(Mandatory = $false)]
+	[String]$GitBranch,
 
     [Parameter(Mandatory = $false)]
         [Switch]$Firewall,
@@ -178,6 +181,11 @@ try {
     Write-Output "-BuildDir: $BuildDir"
     Write-Output ""
 
+    if (! [string]::IsNullOrEmpty($GitBranch)) {
+        Write-Output "-GitBranch: $GitBranch"
+        Write-Output ""
+    }
+
     $user_dir = $env:USERPROFILE
     Write-Output "User directory     : $user_dir"
 
@@ -284,7 +292,7 @@ try {
     ##############################################################################
     # Check for existing VS2017 and required workloads
     #
-    Write-Output "Checking for existing VS2017 15.9, VS2019 16.11, or VS2022 17.0 required workloads ..."
+    Write-Output "Checking for existing VS2017 15.9, VS2019 16.11, or VS2022 17.2 required workloads ..."
     Write-Output ""
     WriteGreenOutput "Note: Visual Studio 2017, 2019, and 2022 will peacefully coexist."
     Write-Output ""
@@ -405,12 +413,12 @@ try {
 		    # Write-Output "16.11 version found"
 		    $workload_2019_found = $true
 		    $vs2019_found = $true
-		} elseif ($ff.StartsWith('17.0')) {
-		    # Write-Output "17.0 version found"
+		} elseif ($ff.StartsWith('17.2')) {
+		    # Write-Output "17.2 version found"
 		    $workload_2022_found = $true
 		    $vs2022_found = $true
 		} else {
-		    # Write-Output "not            : VS2017 15.9, VS2019 16.11, or VS2022 17.0 version"
+		    # Write-Output "not            : VS2017 15.9, VS2019 16.11, or VS2022 17.2 version"
 		}
 	    }
 
@@ -429,7 +437,7 @@ try {
 	    if ($VS2022.IsPresent -And !$workload_2022_found) {
 		$vs_2022_missing = $true
 		WriteCustomOutput -ForegroundColor Yellow -BackgroundColor Black -Message `
-		    "missing VS2022 : $workload"
+		    "missing VS2022 17.2 : $workload"
 	    }
 	}
     }
@@ -589,11 +597,15 @@ try {
     $input = Read-Host -Prompt 'Press return to continue'
 
     if ( -not (Test-Path -Path 'hyperion' -PathType Container) ) {
-        Write-Output "git clone https://github.com/SDL-Hercules-390/hyperion.git"
         # (git clone  https://github.com/SDL-Hercules-390/hyperion.git 2>&1) | Out-Default
         $cmd = "git clone https://github.com/SDL-Hercules-390/hyperion.git"
-        Invoke-Expression -Command "$cmd"
 
+        if (! [string]::IsNullOrEmpty($GitBranch)) {
+            $cmd = "git clone -b $GitBranch https://github.com/SDL-Hercules-390/hyperion.git"
+        }
+
+        Write-Output "$cmd"
+        Invoke-Expression -Command "$cmd"
     } else {
         Write-Output "hyperion directory exists, skipping 'git clone'."
     }
