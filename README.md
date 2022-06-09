@@ -121,7 +121,7 @@ Decide if you prefer to use Visual Studio 2017, 2019, or 2022.
 cd c:\hercules-helper-windows
 .\hyperion-buildall.ps1 -VS2017 -BuildDir c:\hercules
 ```
-If the ```-FGetBranch``` option is specified, a branch other
+If the ```-GetBranch``` option is specified, a branch other
 than ```master``` may be checked-out.
 Such as:
 
