@@ -24,8 +24,8 @@ than sorry.  BACK UP YOUR SYSTEM before running any of this!
 **Please do not run this entire process as Administrator.  That can be damaging.
 Windows will prompt for your permissions where required.**
 
-(I don't really support Windows 7, but it does seem to work with PowerShell 5.1
-and VS2017)
+(I don't really want to support Windows 7, but it does seem to work with
+PowerShell 5.1 and VS2017)
 
 ## hyperion-buildall.ps1
 
@@ -121,6 +121,14 @@ Decide if you prefer to use Visual Studio 2017, 2019, or 2022.
 cd c:\hercules-helper-windows
 .\hyperion-buildall.ps1 -VS2017 -BuildDir c:\hercules
 ```
+If the ```-FGetBranch``` option is specified, a branch other
+than ```master``` may be checked-out.
+Such as:
+
+```
+.\hyperion-buildall.ps1 -VS2017 -BuildDir c:\hercules -GitBranch develop
+```
+
 If the ```-Firewall``` option is specified, Windows Firewall rules
 to allow Hercules will be added.
 
