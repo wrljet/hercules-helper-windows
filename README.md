@@ -129,6 +129,10 @@ Such as:
 .\hyperion-buildall.ps1 -VS2017 -BuildDir c:\hercules -GitBranch develop
 ```
 
+The script will not overwrite an existing git clone directory,
+to protect local changes you may have.  To force an overwrite,
+add the ```-ForceClone``` option to the command line.
+
 If the ```-Firewall``` option is specified, Windows Firewall rules
 to allow Hercules will be added.
 

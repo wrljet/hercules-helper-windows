@@ -1,7 +1,7 @@
 # hyperion-buildall.ps1 -- Part of Hercules-Helper
 #
 # SDL-Hercules-390 builder
-# Updated: 08 JUN 2022
+# Updated: 20 OCT 2022
 #
 # The most recent version of this project can be obtained with:
 #   git clone https://github.com/wrljet/hercules-helper-windows.git
@@ -13,7 +13,7 @@
 # Bill Lewis  bill@wrljet.com
 #
 # Intended for Windows 10
-#    Tested on Windows 10 Pro,  21H2
+#    Tested on Windows 10 Pro,  22H2
 #    Works  on Windows 10 Home, 21H1 (not routinely tested)
 #    Works  on Windows 7 Enterprise (not routinely tested)
 #    Works  on Windows 11 (not routinely tested)
@@ -49,6 +49,9 @@ Param (
 
     [Parameter(Mandatory = $false)]
 	[String]$GitBranch,
+
+    [Parameter(Mandatory = $false)]
+        [Switch]$ForceClone,
 
     [Parameter(Mandatory = $false)]
         [Switch]$Firewall,
@@ -183,6 +186,11 @@ try {
 
     if (! [string]::IsNullOrEmpty($GitBranch)) {
         Write-Output "-GitBranch: $GitBranch"
+        Write-Output ""
+    }
+
+    if ($ForceClone.IsPresent) {
+        Write-Output "-ForceClone: Git repo will be overwritten"
         Write-Output ""
     }
 
@@ -588,13 +596,33 @@ try {
     Write-Output ""
 
     ##############################################################################
-    # Download Hercules from GitHub and related packages
+    # Download SDL-Hercules-390 and related packages from GitHub 
     #
 
     pushd "$hercules_dir"
 
     Write-Output "==> Clone Hercules from GitHub and download other packages"
     $input = Read-Host -Prompt 'Press return to continue'
+
+    # If hyperion repo directory already exists, and -ForceClone is
+    # specified, delete it.
+    #
+    if ( Test-Path -Path 'hyperion' -PathType Container ) {
+        if ($ForceClone.IsPresent) {
+            Write-Output "-ForceClone specified: removing existing hyperion directory"
+            Write-Output ""
+
+            do { $input = Read-Host -Prompt "Remove existing SDL-Hercules-390 git repo? [y/N]" }
+            until ("", "yes", "no", "YES", "NO", "y", "Y", "n", "N" -ccontains $input)
+
+            if ( $input.ToLower() -eq 'y') {
+                Remove-Item -path 'hyperion' -Recurse -Force
+            } else {
+                Write-Output "Quitting"
+                Exit 3
+            }
+        }
+    }
 
     if ( -not (Test-Path -Path 'hyperion' -PathType Container) ) {
         # (git clone  https://github.com/SDL-Hercules-390/hyperion.git 2>&1) | Out-Default
