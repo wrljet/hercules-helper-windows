@@ -31,7 +31,7 @@ PowerShell 5.1 and VS2017)
 
 This PowerShell script will perform a complete build of Hercules and its external
 packages, and run all the automated tests.  It will also install Visual Studio
-2017, 2019, or 2022, or update an existing Visual Studio installation to add only
+2017, 2019, or 2022 (17.4), or update an existing Visual Studio installation to add only
 any require workloads that are missing.
 
 The full process is:
