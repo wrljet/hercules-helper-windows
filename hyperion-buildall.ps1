@@ -1,7 +1,7 @@
 # hyperion-buildall.ps1 -- Part of Hercules-Helper
 #
 # SDL-Hercules-390 builder
-# Updated: 15 FEB 2023
+# Updated: 23 FEB 2023
 #
 # The most recent version of this project can be obtained with:
 #   git clone https://github.com/wrljet/hercules-helper-windows.git
@@ -49,6 +49,9 @@ Param (
 
     [Parameter(Mandatory = $false)]
 	[String]$GitBranch,
+
+    [Parameter(Mandatory = $false)]
+	[String]$GitCommit,
 
     [Parameter(Mandatory = $false)]
         [Switch]$ForceClone,
@@ -186,6 +189,11 @@ try {
 
     if (! [string]::IsNullOrEmpty($GitBranch)) {
         Write-Output "-GitBranch: $GitBranch"
+        Write-Output ""
+    }
+
+    if (! [string]::IsNullOrEmpty($GitCommit)) {
+        Write-Output "-GitCommit: $GitCommit"
         Write-Output ""
     }
 
@@ -634,6 +642,14 @@ try {
 
         Write-Output "$cmd"
         Invoke-Expression -Command "$cmd"
+
+        if (! [string]::IsNullOrEmpty($GitCommit)) {
+            pushd hyperion
+            $cmd = "git checkout $GitCommit"
+            Write-Output "$cmd"
+            Invoke-Expression -Command "$cmd"
+            popd
+        }
     } else {
         Write-Output "hyperion directory exists, skipping 'git clone'."
     }
