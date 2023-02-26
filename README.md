@@ -121,13 +121,16 @@ Decide if you prefer to use Visual Studio 2017, 2019, or 2022.
 cd c:\hercules-helper-windows
 .\hyperion-buildall.ps1 -VS2017 -BuildDir c:\hercules
 ```
-If the ```-GetBranch``` option is specified, a branch other
+If the ```-GitBranch``` option is specified, a branch other
 than ```master``` may be checked-out.
 Such as:
 
 ```
 .\hyperion-buildall.ps1 -VS2017 -BuildDir c:\hercules -GitBranch develop
 ```
+
+Similarly, the ```-GitCommit``` option is specified, a specific commit
+may be checked-out.
 
 The script will not overwrite an existing git clone directory,
 to protect local changes you may have.  To force an overwrite,
