@@ -1,7 +1,7 @@
 # hyperion-buildall.ps1 -- Part of Hercules-Helper
 #
 # SDL-Hercules-390 builder
-# Updated: 23 FEB 2023
+# Updated: 18 MAR 2023
 #
 # The most recent version of this project can be obtained with:
 #   git clone https://github.com/wrljet/hercules-helper-windows.git
@@ -308,7 +308,7 @@ try {
     ##############################################################################
     # Check for existing VS2017 and required workloads
     #
-    Write-Output "Checking for existing VS2017 15.9, VS2019 16.11, or VS2022 17.4 required workloads ..."
+    Write-Output "Checking for existing VS2017 15.9, VS2019 16.11, or VS2022 17.5 required workloads ..."
     Write-Output ""
     WriteGreenOutput "Note: Visual Studio 2017, 2019, and 2022 will peacefully coexist."
     Write-Output ""
@@ -429,12 +429,12 @@ try {
 		    # Write-Output "16.11 version found"
 		    $workload_2019_found = $true
 		    $vs2019_found = $true
-		} elseif ($ff.StartsWith('17.4')) {
-		    # Write-Output "17.4 version found"
+		} elseif ($ff.StartsWith('17.5')) {
+		    # Write-Output "17.5 version found"
 		    $workload_2022_found = $true
 		    $vs2022_found = $true
 		} else {
-		    # Write-Output "not            : VS2017 15.9, VS2019 16.11, or VS2022 17.4 version"
+		    # Write-Output "not            : VS2017 15.9, VS2019 16.11, or VS2022 17.5 version"
 		}
 	    }
 
@@ -453,7 +453,7 @@ try {
 	    if ($VS2022.IsPresent -And !$workload_2022_found) {
 		$vs_2022_missing = $true
 		WriteCustomOutput -ForegroundColor Yellow -BackgroundColor Black -Message `
-		    "missing VS2022 17.4 : $workload"
+		    "missing VS2022 17.5 : $workload"
 	    }
 	}
     }
