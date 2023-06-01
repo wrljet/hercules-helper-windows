@@ -5,7 +5,8 @@
 Utility scripts to help with building and deploying the Hercules emulator
 
 This is a testbed and will be updated occassionally and/or merged
-into SDL-Hercules-390 and its documentation when completed.
+into SDL-Hercules-390 and/or Hercules Aethra and their documentation
+when completed.
 
 The most recent version of this project can be obtained with:
 ```
@@ -27,11 +28,11 @@ Windows will prompt for your permissions where required.**
 (I don't really want to support Windows 7, but it does seem to work with
 PowerShell 5.1 and VS2017)
 
-## hyperion-buildall.ps1
+## hercules-buildall.ps1
 
 This PowerShell script will perform a complete build of Hercules and its external
 packages, and run all the automated tests.  It will also install Visual Studio
-2017, 2019, or 2022 (17.5), or update an existing Visual Studio installation to add only
+2017, 2019, or 2022 (17.6), or update an existing Visual Studio installation to add only
 any require workloads that are missing.
 
 The full process is:
@@ -117,16 +118,25 @@ Decide where you want Hercules to be built.  In this example I am using C:\hercu
 
 Decide if you prefer to use Visual Studio 2017, 2019, or 2022.
 
+
 ```
 cd c:\hercules-helper-windows
-.\hyperion-buildall.ps1 -VS2017 -BuildDir c:\hercules
+.\hercules-buildall.ps1 -VS2017 -BuildDir c:\hercules
 ```
+
+The ```-Flavor``` option may be used to build from among the various forks
+of Hercules 4. Presently, Aethra and SDL-Hyperion are supported.  For example:
+
+```
+.\hercules-buildall.ps1 -VS2017 -BuildDir c:\hercules -Flavor Aethra
+```
+
 If the ```-GitBranch``` option is specified, a branch other
 than ```master``` may be checked-out.
 Such as:
 
 ```
-.\hyperion-buildall.ps1 -VS2017 -BuildDir c:\hercules -GitBranch develop
+.\hercules-buildall.ps1 -VS2017 -BuildDir c:\hercules Flavor SDL-Hyperion -GitBranch develop
 ```
 
 Similarly, the ```-GitCommit``` option is specified, a specific commit

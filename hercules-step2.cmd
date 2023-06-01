@@ -1,7 +1,7 @@
-:: hyperion-step2.cmd -- Part of Hercules-Helper
+:: hercules-step2.cmd -- Part of Hercules-Helper
 ::
-:: SDL-Hercules-390 builder
-:: Updated: 22 MAR 2021
+:: Hercules builder
+:: Updated: 01 JUN 2021
 ::
 :: The most recent version of this project can be obtained with:
 ::   git clone https://github.com/wrljet/hercules-helper.git
@@ -12,13 +12,13 @@
 ::
 :: Bill Lewis  bill@wrljet.com
 ::
-:: Called from hyperion-buildall.ps1, from the hercules-helper\windows directory
+:: Called from hercules-buildall.ps1, from the hercules-helper\windows directory
 
 @if defined TRACEON (@echo on) else (@echo off)
 
-echo Starting Hyperion-Step 2...
+echo Starting Hercules-Step 2...
 
-pushd %HERCULES_HELPER_BUILD_DIR%\hyperion
+pushd %HERCULES_HELPER_BUILD_DIR%\%1
 
     set "HERCULES_BUILD_DIR=%cd%\msvc.AMD64.bin"
  :: echo %HERCULES_BUILD_DIR%
@@ -40,13 +40,13 @@ pushd %HERCULES_HELPER_BUILD_DIR%\hyperion
     echo [40;92m==^> Run Tests - Press return to continue ...[0m
     set /P dummy=
 
-    call tests\runtest.cmd -n * -t 2
+    call tests\runtest.cmd -n * -t 2 -d ..\%1\tests
 
 popd
 :: back to builder
 
 echo.
-echo Hyperion-Step2 phase completed!
+echo Hercules-Step2 phase completed!
 echo Returning to PowerShell
 echo.
 
