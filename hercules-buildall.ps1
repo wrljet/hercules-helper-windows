@@ -1,7 +1,7 @@
 # hercules-buildall.ps1 -- Part of Hercules-Helper
 #
 # Hercules builder
-# Updated: 01 JUN 2023
+# Updated: 22 JUN 2023
 #
 # The most recent version of this project can be obtained with:
 #   git clone https://github.com/wrljet/hercules-helper-windows.git
@@ -14,10 +14,9 @@
 #
 # Intended for Windows 10
 #    Tested on Windows 10 Pro,  22H2
-#    Tested on Windows 11 Pro FIXME
+#    Works  on Windows 11 (not routinely tested)
 #    Works  on Windows 10 Home, 21H1 (not routinely tested)
 #    Works  on Windows 7 Enterprise (not routinely tested)
-#    Works  on Windows 11 (not routinely tested)
 #    Tested with PowerShell 5.1, 7.1.3, and 7.2.4
 #
 # Works with Visual Studio 2017, 2019, and 2022 Community Edition
@@ -129,29 +128,14 @@ try {
 
     Import-Module -Name ".\EnvPaths.psm1"
 
-    ##############################################################################
-    #
-    # Create a local C# exe that acts like echo -n
-    #
-##    $compiler_parameters = New-Object System.CodeDom.Compiler.CompilerParameters
-##    $compiler_parameters.GenerateExecutable = $true
-##    $compiler_parameters.OutputAssembly = "$consoleout_exe"
-##
-##    Add-Type -Language CSharp -CompilerParameters $compiler_parameters `
-##        -TypeDefinition @"
-##using System;
-##namespace WRLJET
-##{
-##   public class ConsoleOut
-##   {
-##      public static void Main(string[] args)
-##      {
-##         Console.Write(args[0]);
-##      }
-##   }
-##}
-##"@
-    ##############################################################################
+    # Create the Rebuild.cmd script as we go along
+    $rebuild_filename = ".\rebuild.cmd"
+    ":: Rebuild Hercules, created by Hercules-Helper" | Out-File -FilePath $rebuild_filename
+    "::" | Out-File -FilePath $rebuild_filename -Append
+    ":: Original options used:" | Out-File -FilePath $rebuild_filename -Append
+
+    Write-Output ""
+    Write-Output "Rebuild script: $rebuild_filename"
 
     Write-Output ""
     Write-Output "Options:"
@@ -179,16 +163,22 @@ try {
         Exit 3
     } elseif ($VS2017.IsPresent) {
         Write-Output "-VS2017  : Using Visual Studio 2017 installation/update"
+        ":: Using VS2017" | Out-File -FilePath $rebuild_filename -Append
     } elseif ($VS2019.IsPresent) {
         Write-Output "-VS2019  : Using Visual Studio 2019 installation/update"
+        ":: Using VS2019" | Out-File -FilePath $rebuild_filename -Append
     } elseif ($VS2022.IsPresent) {
         Write-Output "-VS2022  : Using Visual Studio 2022 installation/update"
+        ":: Using VS2022" | Out-File -FilePath $rebuild_filename -Append
     }
 
     if ($Firewall.IsPresent) {
         Write-Output "-Firewall: firewall rules will be updated"
+        ":: Firewall rules will be updated" | Out-File -FilePath $rebuild_filename -Append
+        ":: (not yet implemented)" | Out-File -FilePath $rebuild_filename -Append
     } else {
         Write-Output "         : firewall rules will not be updated"
+        ":: Firewall rules will not be updated" | Out-File -FilePath $rebuild_filename -Append
     }
 
     Write-Output "-BuildDir: $BuildDir"
@@ -196,9 +186,11 @@ try {
     if (! [string]::IsNullOrEmpty($Flavor)) {
         if ( $Flavor.ToLower() -eq 'sdl-hyperion') {
             Write-Output "-Flavor: SDL-Hyperion"
+            ":: Build flavor = SDL-Hyperion" | Out-File -FilePath $rebuild_filename -Append
             $Flavor = "sdl-hyperion"
         } elseif ( $Flavor.ToLower() -eq 'aethra') {
             Write-Output "-Flavor: Aethra"
+            ":: Build flavor = Aethra" | Out-File -FilePath $rebuild_filename -Append
             $Flavor = "aethra"
         } else {
             Write-Error "Error: Unknown Flavor option: $Flavor"
@@ -206,6 +198,7 @@ try {
         }
     } else {
         Write-Output "-Flavor not present, assuming SDL-Hyperion"
+        ":: Build flavor = SDL-Hyperion" | Out-File -FilePath $rebuild_filename -Append
         $Flavor = "sdl-hyperion"
     }
 
@@ -221,41 +214,54 @@ try {
         }
     }
 
+    ":: GitRepo = $GitRepo" | Out-File -FilePath $rebuild_filename -Append
+
     if (! [string]::IsNullOrEmpty($GitBranch)) {
         Write-Output "-GitBranch: $GitBranch"
+        ":: GitBranch = $GitBranch" | Out-File -FilePath $rebuild_filename -Append
     }
 
     if (! [string]::IsNullOrEmpty($GitCommit)) {
         Write-Output "-GitCommit: $GitCommit"
+        ":: GitCommit = $GitCommit" | Out-File -FilePath $rebuild_filename -Append
     }
 
     if ($ForceClone.IsPresent) {
         Write-Output "-ForceClone: Git repo will be overwritten"
+        ":: ForceClone = yes" | Out-File -FilePath $rebuild_filename -Append
     }
 
     Write-Output ""
 
     $user_dir = $env:USERPROFILE
     Write-Output "User directory     : $user_dir"
+    ":: User directory = $user_dir" | Out-File -FilePath $rebuild_filename -Append
 
     $hercules_dir = "$BuildDir"
     $dir = New-Item -ItemType Directory -Force -Path "$hercules_dir"
     $hercules_dir = Resolve-Path "$hercules_dir"
     Write-Output "Hercules directory : $hercules_dir"
+    ":: Hercules directory = $hercules_dir" | Out-File -FilePath $rebuild_filename -Append
 
     $goodies_dir = ".\goodies"
     $goodies_dir = Resolve-Path "$goodies_dir"
     Write-Output "goodies_dir        : $goodies_dir"
+    ":: Goodies directory = $goodies_dir" | Out-File -FilePath $rebuild_filename -Append
 
     $unzip_exe = "$goodies_dir\gnu\unzip.exe"
     Write-Output "unzip.exe          : $unzip_exe"
+    ":: Unzip = $unzip_exe" | Out-File -FilePath $rebuild_filename -Append
     $wget_exe = "$goodies_dir\gnu\wget.exe"
     Write-Output "wget.exe           : $wget_exe"
+    ":: Wget = $wget_exe" | Out-File -FilePath $rebuild_filename -Append
     Write-Output ""
 
     $sLogPath = Resolve-Path '.\'
     $sLogName = 'logfile.log'
     $sLogFile = Join-Path -Path $sLogPath -ChildPath $sLogName
+    ":: LogFile = $sLogFile" | Out-File -FilePath $rebuild_filename -Append
+
+    "" | Out-File -FilePath $rebuild_filename -Append
 
     ##############################################################################
     if (Test-Path 'env:REXX_HOME') {
@@ -589,6 +595,9 @@ try {
 	Exit 3
     }
 
+    "set HERCULES_HELPER_BUILD_DIR=$hercules_dir" | Out-File -FilePath $rebuild_filename -Append
+    "set HERCULES_HELPER_VCVARS_CMD=$vcvars_cmd" | Out-File -FilePath $rebuild_filename -Append
+
     $input = Read-Host -Prompt 'Press return to continue'
 
     $props_dir = "$HOME\AppData\Local\Microsoft\MSBuild\v4.0"
@@ -635,6 +644,8 @@ try {
     Write-Output "... C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include"
     Add-EnvInclude -Path "C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include" -Container "User"
     Write-Output ""
+
+    "set INCLUDE=$env:Include" | Out-File -FilePath $rebuild_filename -Append
 
     ##############################################################################
     # Download SDL-Hercules-390 and related packages from GitHub 
@@ -767,6 +778,22 @@ try {
 
     $env:HERCULES_HELPER_BUILD_DIR = "$hercules_dir"
     $env:HERCULES_HELPER_VCVARS_CMD = "$vcvars_cmd"
+
+    "" | Out-File -FilePath $rebuild_filename -Append
+    "pushd ""%HERCULES_HELPER_BUILD_DIR%\$Flavor""" | Out-File -FilePath $rebuild_filename -Append
+    "set HERCULES_BUILD_DIR=%cd%\msvc.AMD64.bin" | Out-File -FilePath $rebuild_filename -Append
+    "call ""%HERCULES_HELPER_VCVARS_CMD%""" | Out-File -FilePath $rebuild_filename -Append
+    "" | Out-File -FilePath $rebuild_filename -Append
+    ":: set /P dummy=" | Out-File -FilePath $rebuild_filename -Append
+    "call makefile.bat RETAIL-X64 makefile.msvc 8 -title ""*** Hercules-Helper Test Build ***"" -a" | Out-File -FilePath $rebuild_filename -Append
+    "" | Out-File -FilePath $rebuild_filename -Append
+
+    ":: Uncomment line below to run tests" | Out-File -FilePath $rebuild_filename -Append
+    ":: call tests\runtest.cmd -n * -t 2 -d ..\$Flavor\tests" | Out-File -FilePath $rebuild_filename -Append
+    "" | Out-File -FilePath $rebuild_filename -Append
+    "popd" | Out-File -FilePath $rebuild_filename -Append
+    "" | Out-File -FilePath $rebuild_filename -Append
+
     # cmd /k "$vcvars_cmd"
     # Invoke-Expression -Command "cmd /c hercules-step2.cmd"
     # cmd.exe /c hercules-step2.cmd 2`>`&1 | Tee-Object -FilePath "hercules-helper-build.log"
