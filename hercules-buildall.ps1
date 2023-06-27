@@ -595,6 +595,8 @@ try {
 	Exit 3
     }
 
+    "setlocal" | Out-File -FilePath $rebuild_filename -Append
+    "" | Out-File -FilePath $rebuild_filename -Append
     "set HERCULES_HELPER_BUILD_DIR=$hercules_dir" | Out-File -FilePath $rebuild_filename -Append
     "set HERCULES_HELPER_VCVARS_CMD=$vcvars_cmd" | Out-File -FilePath $rebuild_filename -Append
 
@@ -787,11 +789,13 @@ try {
     ":: set /P dummy=" | Out-File -FilePath $rebuild_filename -Append
     "call makefile.bat RETAIL-X64 makefile.msvc 8 -title ""*** Hercules-Helper Test Build ***"" -a" | Out-File -FilePath $rebuild_filename -Append
     "" | Out-File -FilePath $rebuild_filename -Append
+    "echo on" | Out-File -FilePath $rebuild_filename -Append
 
     ":: Uncomment line below to run tests" | Out-File -FilePath $rebuild_filename -Append
     ":: call tests\runtest.cmd -n * -t 2 -d ..\$Flavor\tests" | Out-File -FilePath $rebuild_filename -Append
     "" | Out-File -FilePath $rebuild_filename -Append
     "popd" | Out-File -FilePath $rebuild_filename -Append
+    "endlocal" | Out-File -FilePath $rebuild_filename -Append
     "" | Out-File -FilePath $rebuild_filename -Append
 
     # cmd /k "$vcvars_cmd"
