@@ -661,7 +661,7 @@ try {
     # If hyperion repo directory already exists, and -ForceClone is
     # specified, delete it.
     #
-    if ( Test-Path -Path '$Flavor' -PathType Container ) {
+    if ( Test-Path -Path "$Flavor" -PathType Container ) {
         if ($ForceClone.IsPresent) {
             Write-Output "-ForceClone specified: removing existing $Flavor directory"
             Write-Output ""
@@ -670,7 +670,7 @@ try {
             until ("", "yes", "no", "YES", "NO", "y", "Y", "n", "N" -ccontains $input)
 
             if ( $input.ToLower() -eq 'y') {
-                Remove-Item -path '$Flavor' -Recurse -Force
+                Remove-Item -path "$Flavor" -Recurse -Force
             } else {
                 Write-Output "Quitting"
                 Exit 3
@@ -678,7 +678,7 @@ try {
         }
     }
 
-    if ( -not (Test-Path -Path '$Flavor' -PathType Container) ) {
+    if ( -not (Test-Path -Path "$Flavor" -PathType Container) ) {
         # (git clone  https://github.com/SDL-Hercules-390/hyperion.git 2>&1) | Out-Default
         $cmd = "git clone $GitRepo $Flavor"
 
