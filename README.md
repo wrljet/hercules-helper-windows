@@ -136,7 +136,7 @@ than ```master``` may be checked-out.
 Such as:
 
 ```
-.\hercules-buildall.ps1 -VS2017 -BuildDir c:\hercules Flavor SDL-Hyperion -GitBranch develop
+.\hercules-buildall.ps1 -VS2017 -BuildDir c:\hercules -Flavor SDL-Hyperion -GitBranch develop
 ```
 
 Similarly, the ```-GitCommit``` option is specified, a specific commit
