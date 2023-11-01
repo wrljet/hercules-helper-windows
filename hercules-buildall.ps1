@@ -1,7 +1,7 @@
 # hercules-buildall.ps1 -- Part of Hercules-Helper
 #
 # Hercules builder
-# Updated: 22 JUN 2023
+# Updated: 01 NOV 2023
 #
 # The most recent version of this project can be obtained with:
 #   git clone https://github.com/wrljet/hercules-helper-windows.git
@@ -17,7 +17,7 @@
 #    Works  on Windows 11 (not routinely tested)
 #    Works  on Windows 10 Home, 21H1 (not routinely tested)
 #    Works  on Windows 7 Enterprise (not routinely tested)
-#    Tested with PowerShell 5.1, 7.1.3, and 7.2.4
+#    Tested with PowerShell 5.1, 7.1.3, and 7.3.8
 #
 # Works with Visual Studio 2017, 2019, and 2022 Community Edition
 # in C:\Program Files (x86)\Microsoft Visual Studio\201x\Community
@@ -347,7 +347,7 @@ try {
     ##############################################################################
     # Check for existing VS2017 and required workloads
     #
-    Write-Output "Checking for existing VS2017 15.9, VS2019 16.11, or VS2022 17.6 required workloads ..."
+    Write-Output "Checking for existing VS2017 15.9, VS2019 16.11, or VS2022 17.7 required workloads ..."
     Write-Output ""
     WriteGreenOutput "Note: Visual Studio 2017, 2019, and 2022 will peacefully coexist."
     Write-Output ""
@@ -468,12 +468,12 @@ try {
 		    # Write-Output "16.11 version found"
 		    $workload_2019_found = $true
 		    $vs2019_found = $true
-		} elseif ($ff.StartsWith('17.6')) {
-		    # Write-Output "17.6 version found"
+		} elseif ($ff.StartsWith('17.7')) {
+		    # Write-Output "17.7 version found"
 		    $workload_2022_found = $true
 		    $vs2022_found = $true
 		} else {
-		    # Write-Output "not            : VS2017 15.9, VS2019 16.11, or VS2022 17.6 version"
+		    # Write-Output "not            : VS2017 15.9, VS2019 16.11, or VS2022 17.7 version"
 		}
 	    }
 
@@ -492,7 +492,7 @@ try {
 	    if ($VS2022.IsPresent -And !$workload_2022_found) {
 		$vs_2022_missing = $true
 		WriteCustomOutput -ForegroundColor Yellow -BackgroundColor Black -Message `
-		    "missing VS2022 17.6 : $workload"
+		    "missing VS2022 17.7 : $workload"
 	    }
 	}
     }
