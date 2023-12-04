@@ -197,9 +197,9 @@ try {
             Exit 3
         }
     } else {
-        Write-Output "-Flavor not present, assuming SDL-Hyperion"
-        ":: Build flavor = SDL-Hyperion" | Out-File -FilePath $rebuild_filename -Append
-        $Flavor = "sdl-hyperion"
+        Write-Output "-Flavor not present, assuming Hercules-Aethra"
+        ":: Build flavor = Hercules-Aethra" | Out-File -FilePath $rebuild_filename -Append
+        $Flavor = "aethra"
     }
 
     if (! [string]::IsNullOrEmpty($GitRepo)) {
