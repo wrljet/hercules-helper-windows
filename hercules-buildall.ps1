@@ -1,7 +1,7 @@
 # hercules-buildall.ps1 -- Part of Hercules-Helper
 #
 # Hercules builder
-# Updated: 04 DEC 2023
+# Updated: 19 FEB 2024
 #
 # The most recent version of this project can be obtained with:
 #   git clone https://github.com/wrljet/hercules-helper-windows.git
@@ -12,10 +12,10 @@
 #
 # Bill Lewis  bill@wrljet.com
 #
-# Intended for Windows 10
+# Intended for Windows 10 and 11
 #    Tested on Windows 10 Pro,  22H2
 #    Works  on Windows 11 (not routinely tested)
-#    Works  on Windows 10 Home, 21H1 (not routinely tested)
+#    Works  on Windows 10 Home, 22H2 (not routinely tested)
 #    Works  on Windows 7 Enterprise (not routinely tested)
 #    Tested with PowerShell 5.1, 7.1.3, and 7.3.8
 #
@@ -184,7 +184,7 @@ try {
     Write-Output "-BuildDir: $BuildDir"
 
     if (! [string]::IsNullOrEmpty($Flavor)) {
-        if ( $Flavor.ToLower() -eq 'sdl-hyperion') {
+        if ( $Flavor.ToLower() -eq 'sdl-hyperion' -Or $Flavor.ToLower() -eq 'sdl-hercules') {
             Write-Output "-Flavor: SDL-Hyperion"
             ":: Build flavor = SDL-Hyperion" | Out-File -FilePath $rebuild_filename -Append
             $Flavor = "sdl-hyperion"
@@ -347,7 +347,7 @@ try {
     ##############################################################################
     # Check for existing VS2017 and required workloads
     #
-    Write-Output "Checking for existing VS2017 15.9, VS2019 16.11, or VS2022 17.8 required workloads ..."
+    Write-Output "Checking for existing VS2017 15.9, VS2019 16.11, or VS2022 17.9 required workloads ..."
     Write-Output ""
     WriteGreenOutput "Note: Visual Studio 2017, 2019, and 2022 will peacefully coexist."
     Write-Output ""
@@ -468,12 +468,12 @@ try {
 		    # Write-Output "16.11 version found"
 		    $workload_2019_found = $true
 		    $vs2019_found = $true
-		} elseif ($ff.StartsWith('17.8')) {
-		    # Write-Output "17.8 version found"
+		} elseif ($ff.StartsWith('17.9')) {
+		    # Write-Output "17.9 version found"
 		    $workload_2022_found = $true
 		    $vs2022_found = $true
 		} else {
-		    # Write-Output "not            : VS2017 15.9, VS2019 16.11, or VS2022 17.8 version"
+		    # Write-Output "not            : VS2017 15.9, VS2019 16.11, or VS2022 17.9 version"
 		}
 	    }
 
@@ -492,7 +492,7 @@ try {
 	    if ($VS2022.IsPresent -And !$workload_2022_found) {
 		$vs_2022_missing = $true
 		WriteCustomOutput -ForegroundColor Yellow -BackgroundColor Black -Message `
-		    "missing VS2022 17.8 : $workload"
+		    "missing VS2022 17.9 : $workload"
 	    }
 	}
     }
