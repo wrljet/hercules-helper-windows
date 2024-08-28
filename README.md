@@ -32,7 +32,7 @@ PowerShell 5.1 and VS2017)
 
 This PowerShell script will perform a complete build of Hercules and its external
 packages, and run all the automated tests.  It will also install Visual Studio
-2017, 2019, or 2022 (17.7), or update an existing Visual Studio installation to add only
+2017, 2019, or 2022 (17.11), or update an existing Visual Studio installation to add only
 any require workloads that are missing.
 
 The full process is:
@@ -101,7 +101,7 @@ Doing so requires REXX support.  So REXX must be installed before
 we get to that point.  We will install ooRexx.
 
 Navigate to hercules-helper-windows\goodies, where you will find
-the ooRexx-4.2.0.windows.x86_64.exe installer.
+the ooRexx-5.0.0-12583.windows.x86_64.exe installer.
 
 Run the installer.  I've found just accepting all the defaults
 works well.
