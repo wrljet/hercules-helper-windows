@@ -582,14 +582,24 @@ try {
     # Create user property directory/files if missing
 
     if ($VS2017.IsPresent) {
-	$vcvars_cmd = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
 	Write-Output "==> Creating VS2017 user property directory if missing"
+	$vcvars_cmd = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
     } elseif ($VS2019.IsPresent) {
-	$vcvars_cmd = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
 	Write-Output "==> Creating VS2019 user property directory if missing"
+	$vcvars_cmd = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
     } elseif ($VS2022.IsPresent) {
-	$vcvars_cmd = "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
 	Write-Output "==> Creating VS2022 user property directory if missing"
+
+        $vcvars_c_cmd = "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+        if (Test-Path -Path "$vcvars_c_cmd" -PathType leaf ) {
+            Write-Output "==> Found vcvars64.bat on drive C:"
+            $vcvars_cmd = "$vcvars_c_cmd"
+        }
+        $vcvars_d_cmd = "D:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+        if (Test-Path -Path "$vcvars_d_cmd" -PathType leaf ) {
+            Write-Output "==> Found vcvars64.bat on drive D:"
+            $vcvars_cmd = "$vcvars_d_cmd"
+        }
     } else {
         Write-Error "Error: Inconsistent VS2017/VS2019/VS2022 options"
 	Exit 3
@@ -650,7 +660,7 @@ try {
     "set INCLUDE=$env:Include" | Out-File -FilePath $rebuild_filename -Append
 
     ##############################################################################
-    # Download SDL-Hercules-390 and related packages from GitHub 
+    # Download Hercules and related packages from GitHub 
     #
 
     pushd "$hercules_dir"
@@ -666,7 +676,7 @@ try {
             Write-Output "-ForceClone specified: removing existing $Flavor directory"
             Write-Output ""
 
-            do { $input = Read-Host -Prompt "Remove existing SDL-Hercules-390 git repo? [y/N]" }
+            do { $input = Read-Host -Prompt "Remove existing Hercules git repo? [y/N]" }
             until ("", "yes", "no", "YES", "NO", "y", "Y", "n", "N" -ccontains $input)
 
             if ( $input.ToLower() -eq 'y') {
