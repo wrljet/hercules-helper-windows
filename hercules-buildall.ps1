@@ -103,6 +103,42 @@ Function WriteGreenOutput($message)
     }
 }
 
+Function FindVCVARS($pattern)
+{
+
+#Write-Output "FindVCVARS(): pattern: $pattern" | out-host
+
+# $link = Get-ChildItem -Path "C:\ProgramData\Microsoft\Windows\Start Menu" -Recurse -File -Filter "x64*Native*2022.lnk"
+    $link = Get-ChildItem -Path "C:\ProgramData\Microsoft\Windows\Start Menu" -Recurse -File -Filter $pattern
+
+# C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Visual Studio 2022\Visual Studio Tools\VC\x64 Native Tools Command Prompt for VS 2022.lnk
+
+#Write-Output "FindVCVARS(): link: $link" | out-host
+
+    $fullname = $link.FullName
+#Write-Output "FindVCVARS(): link.FullName: $fullname" | out-host
+
+    $sh = New-Object -ComObject WScript.Shell
+    $shortcut = $sh.CreateShortcut($link.FullName)
+#Write-Output "FindVCVARS(): shortcut:" | out-host
+#Write-Output $shortcut | out-host
+
+# /k "E:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+
+    $arguments = $shortcut.Arguments
+#Write-Output "FindVCVARS(): arguments: $arguments" | out-host
+
+#   'matching : '
+    if ($shortcut.Arguments -match '"\w:.*$') {
+        $vcvars = $Matches[0]
+    } else {
+        Write-Output 'Match for vcvars64.bat failed' | out-host
+    }
+
+#Write-Output "FindVCVARS(): vcvars: $vcvars" | out-host
+    return $vcvars.ToString();
+}
+
 ##############################################################################
 
 $ver = $psversiontable.PSVersion
@@ -590,16 +626,22 @@ try {
     } elseif ($VS2022.IsPresent) {
 	Write-Output "==> Creating VS2022 user property directory if missing"
 
-        $vcvars_c_cmd = "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
-        if (Test-Path -Path "$vcvars_c_cmd" -PathType leaf ) {
-            Write-Output "==> Found vcvars64.bat on drive C:"
-            $vcvars_cmd = "$vcvars_c_cmd"
-        }
-        $vcvars_d_cmd = "D:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
-        if (Test-Path -Path "$vcvars_d_cmd" -PathType leaf ) {
-            Write-Output "==> Found vcvars64.bat on drive D:"
-            $vcvars_cmd = "$vcvars_d_cmd"
-        }
+    Write-Output "Looking for VCVARS64.BAT via x64*Native*2022.lnk shortcut search"
+    $vcvars = FindVCVARS 'x64*Native*2022.lnk'
+    Write-Output "Found VCVARS64.BAT file : $vcvars"
+    $vcvars_cmd = "$vcvars"
+    $vcvars_cmd = $vcvars_cmd.Replace("`"","")
+
+#        $vcvars_c_cmd = "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+#        if (Test-Path -Path "$vcvars_c_cmd" -PathType leaf ) {
+#            Write-Output "==> Found vcvars64.bat on drive C:"
+#            $vcvars_cmd = "$vcvars_c_cmd"
+#        }
+#        $vcvars_d_cmd = "D:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+#        if (Test-Path -Path "$vcvars_d_cmd" -PathType leaf ) {
+#            Write-Output "==> Found vcvars64.bat on drive D:"
+#            $vcvars_cmd = "$vcvars_d_cmd"
+#        }
     } else {
         Write-Error "Error: Inconsistent VS2017/VS2019/VS2022 options"
 	Exit 3
