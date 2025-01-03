@@ -15,8 +15,8 @@
 :: Called from hercules-buildall.ps1, from the hercules-helper\windows directory
 
 @if defined TRACEON (@echo on) else (@echo off)
-
-echo Starting Hercules-Step 2...
+set NOPROMPT=%~2
+@echo Starting Hercules-Step 2...
 
 pushd %HERCULES_HELPER_BUILD_DIR%\%1
 
@@ -29,17 +29,21 @@ pushd %HERCULES_HELPER_BUILD_DIR%\%1
  :: set INCLUDE=%INCLUDE%;C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include
 
     echo.
-    echo [40;92m==^> Build Hercules - Press return to continue ...[0m
-    set /P dummy=
-
+    echo [40;92m==^> Build Hercules[0m
+    if "%NOPROMPT%" neq "True" (
+        echo [40;92m==^Press return to continue ...[0m
+        set /P dummy=
+    )
     call makefile.bat RETAIL-X64 makefile.msvc 8 -title "*** Hercules-Helper Test Build ***" -a
 
     echo.
     echo [40;92m Just FYI: Windows Defender anti-malware may cause the tests to fail or hang. [0m
     echo.
-    echo [40;92m==^> Run Tests - Press return to continue ...[0m
-    set /P dummy=
-
+    echo [40;92m==^> Run Tests [0m
+    if "%NOPROMPT%" neq "True" (
+        echo [40;92m==^Press return to continue ...[0m
+        set /P dummy=
+    )
     call tests\runtest.cmd -n * -t 2 -d ..\%1\tests
 
 popd
