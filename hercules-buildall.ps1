@@ -36,28 +36,31 @@ Param (
         [Switch]$SkipVS,
 
     [Parameter(Mandatory = $false)]
-	[Switch]$VS2017,
+    [Switch]$VS2017,
 
     [Parameter(Mandatory = $false)]
-	[Switch]$VS2019,
+    [Switch]$VS2019,
 
     [Parameter(Mandatory = $false)]
-	[Switch]$VS2022,
+    [Switch]$VS2022,
 
     [Parameter(Mandatory = $false)]
-	[String]$BuildDir,
+    [String]$BuildDir,
 
     [Parameter(Mandatory = $false)]
-	[String]$Flavor,
+    [String]$Flavor,
 
     [Parameter(Mandatory = $false)]
-	[String]$GitRepo,
+    [String]$GitFolder,
 
     [Parameter(Mandatory = $false)]
-	[String]$GitBranch,
+    [String]$GitRepo,
 
     [Parameter(Mandatory = $false)]
-	[String]$GitCommit,
+    [String]$GitBranch,
+
+    [Parameter(Mandatory = $false)]
+    [String]$GitCommit,
 
     [Parameter(Mandatory = $false)]
         [Switch]$ForceClone,
@@ -238,19 +241,24 @@ try {
         $Flavor = "aethra"
     }
 
-    if (! [string]::IsNullOrEmpty($GitRepo)) {
-        Write-Output "-GitRepo: $GitRepo"
+    if (! [string]::IsNullOrEmpty($GitFolder)) {
+        Write-Output "-GitFolder: $GitFolder"
+        ":: GitFolder = $GitFolder" | Out-File -FilePath $rebuild_filename -Append
     } else {
-        if ( $Flavor -eq 'sdl-hyperion') {
-            $GitRepo = "https://github.com/SDL-Hercules-390/hyperion.git"
-        } elseif ( $Flavor -eq 'aethra') {
-            $GitRepo = "https://github.com/Hercules-Aethra/aethra.git"
+        if (! [string]::IsNullOrEmpty($GitRepo)) {
+        Write-Output "-GitRepo: $GitRepo"
         } else {
-            $GitRepo = "https://github.com/SDL-Hercules-390/hyperion.git"
+            if ( $Flavor -eq 'sdl-hyperion') {
+                $GitRepo = "https://github.com/SDL-Hercules-390/hyperion.git"
+            } elseif ( $Flavor -eq 'aethra') {
+                $GitRepo = "https://github.com/Hercules-Aethra/aethra.git"
+            } else {
+                $GitRepo = "https://github.com/SDL-Hercules-390/hyperion.git"
+            }
         }
+        ":: GitRepo = $GitRepo" | Out-File -FilePath $rebuild_filename -Append
     }
 
-    ":: GitRepo = $GitRepo" | Out-File -FilePath $rebuild_filename -Append
 
     if (! [string]::IsNullOrEmpty($GitBranch)) {
         Write-Output "-GitBranch: $GitBranch"
@@ -314,7 +322,7 @@ try {
         variables after installing REXX. `
         "
 
-	WriteGreenOutput "        Stop now (Ctrl+C) and install REXX if you've forgotten it."
+    WriteGreenOutput "        Stop now (Ctrl+C) and install REXX if you've forgotten it."
 
         $input = Read-Host -Prompt 'Press return to continue without REXX'
     }
@@ -365,7 +373,7 @@ try {
     }
 
     if ($bzip2_dir_bad -or $pcre_dir_bad -or $zlib_dir_bad) {
-	Exit 3
+    Exit 3
     } else {
         Write-Output ""
     }
@@ -409,7 +417,7 @@ try {
 
         Install-Module VSSetup -Scope CurrentUser -Force
     } else {
-	Write-Output "https://github.com/microsoft/vssetup.powershell is already present locally"
+        Write-Output "https://github.com/microsoft/vssetup.powershell is already present locally"
     }
 
     $workloads_2017 = `
@@ -421,7 +429,7 @@ try {
         'Microsoft.VisualStudio.Component.Windows10SDK', `
         'Microsoft.VisualStudio.Component.Windows10SDK.17763', `
         'Microsoft.VisualStudio.Component.Git', `
-	'Microsoft.VisualStudio.Component.NuGet', `
+        'Microsoft.VisualStudio.Component.NuGet', `
         'Component.GitHub.VisualStudio'
 
     $workloads_2019 = `
@@ -433,7 +441,7 @@ try {
         'Microsoft.VisualStudio.Component.Windows10SDK', `
         'Microsoft.VisualStudio.Component.Windows10SDK.17763', `
         'Microsoft.VisualStudio.Component.Git', `
-	'Microsoft.VisualStudio.Component.NuGet', `
+        'Microsoft.VisualStudio.Component.NuGet', `
         'Component.GitHub.VisualStudio'
 
     $workloads_2022 = `
@@ -463,7 +471,7 @@ try {
         $workloads = $workloads_2022
     } else {
         Write-Error "Error: Inconsistent VS2017/VS2019/VS2022 options"
-	Exit 3
+    Exit 3
     }
 
     Write-Output ""
@@ -482,55 +490,55 @@ try {
 
         $found = (Get-VSSetupInstance -All | Select-VSSetupInstance -Require "$workload" -Version '[15.9,)')
 
-	if ($found -eq $null) {
-	    WriteCustomOutput -ForegroundColor Yellow -BackgroundColor Black -Message `
-		"missing        : $workload"
-	    $vs_2017_missing = $true
-	    $vs_2019_missing = $true
-	    $vs_2022_missing = $true
-	} else {
-	    foreach ($f in $found) {
-		# echo $workload
-		# echo $f.InstallationVersion.ToString()
+        if ($found -eq $null) {
+            WriteCustomOutput -ForegroundColor Yellow -BackgroundColor Black -Message `
+            "missing        : $workload"
+            $vs_2017_missing = $true
+            $vs_2019_missing = $true
+            $vs_2022_missing = $true
+        } else {
+            foreach ($f in $found) {
+                # echo $workload
+                # echo $f.InstallationVersion.ToString()
 
-		$ff = $f.InstallationVersion.ToString() 
-		Write-Output "$ff : $workload"
+                $ff = $f.InstallationVersion.ToString() 
+                Write-Output "$ff : $workload"
 
-		if ($ff.StartsWith('15.9')) {
-		    # Write-Output "15.9 version found"
-		    $workload_2017_found = $true
-		    $vs2017_found = $true
-		} elseif ($ff.StartsWith('16.11')) {
-		    # Write-Output "16.11 version found"
-		    $workload_2019_found = $true
-		    $vs2019_found = $true
-		} elseif ($ff.StartsWith('17.12')) {
-		    # Write-Output "17.12 version found"
-		    $workload_2022_found = $true
-		    $vs2022_found = $true
-		} else {
-		    # Write-Output "not            : VS2017 15.9, VS2019 16.11, or VS2022 17.12 version"
-		}
-	    }
+                if ($ff.StartsWith('15.9')) {
+                    # Write-Output "15.9 version found"
+                    $workload_2017_found = $true
+                    $vs2017_found = $true
+                } elseif ($ff.StartsWith('16.11')) {
+                    # Write-Output "16.11 version found"
+                    $workload_2019_found = $true
+                    $vs2019_found = $true
+                } elseif ($ff.StartsWith('17.12')) {
+                    # Write-Output "17.12 version found"
+                    $workload_2022_found = $true
+                    $vs2022_found = $true
+                } else {
+                    # Write-Output "not            : VS2017 15.9, VS2019 16.11, or VS2022 17.12 version"
+                }
+            }
 
-	    if ($VS2017.IsPresent -And !$workload_2017_found) {
-		$vs_2017_missing = $true
-		WriteCustomOutput -ForegroundColor Yellow -BackgroundColor Black -Message `
-		    "missing VS2017 : $workload"
-	    }
+            if ($VS2017.IsPresent -And !$workload_2017_found) {
+                $vs_2017_missing = $true
+                WriteCustomOutput -ForegroundColor Yellow -BackgroundColor Black -Message `
+                    "missing VS2017 : $workload"
+            }
 
-	    if ($VS2019.IsPresent -And !$workload_2019_found) {
-		$vs_2019_missing = $true
-		WriteCustomOutput -ForegroundColor Yellow -BackgroundColor Black -Message `
-		    "missing VS2019 : $workload"
-	    }
+            if ($VS2019.IsPresent -And !$workload_2019_found) {
+                $vs_2019_missing = $true
+                WriteCustomOutput -ForegroundColor Yellow -BackgroundColor Black -Message `
+                    "missing VS2019 : $workload"
+            }
 
-	    if ($VS2022.IsPresent -And !$workload_2022_found) {
-		$vs_2022_missing = $true
-		WriteCustomOutput -ForegroundColor Yellow -BackgroundColor Black -Message `
-		    "missing VS2022 17.12 : $workload"
-	    }
-	}
+            if ($VS2022.IsPresent -And !$workload_2022_found) {
+                $vs_2022_missing = $true
+                WriteCustomOutput -ForegroundColor Yellow -BackgroundColor Black -Message `
+                    "missing VS2022 17.12 : $workload"
+            }
+        }
     }
 
     Write-Output ""
@@ -618,13 +626,13 @@ try {
     # Create user property directory/files if missing
 
     if ($VS2017.IsPresent) {
-	Write-Output "==> Creating VS2017 user property directory if missing"
-	$vcvars_cmd = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+    Write-Output "==> Creating VS2017 user property directory if missing"
+    $vcvars_cmd = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
     } elseif ($VS2019.IsPresent) {
-	Write-Output "==> Creating VS2019 user property directory if missing"
-	$vcvars_cmd = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+    Write-Output "==> Creating VS2019 user property directory if missing"
+    $vcvars_cmd = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
     } elseif ($VS2022.IsPresent) {
-	Write-Output "==> Creating VS2022 user property directory if missing"
+    Write-Output "==> Creating VS2022 user property directory if missing"
 
     Write-Output "Looking for VCVARS64.BAT via x64*Native*2022.lnk shortcut search"
     $vcvars = FindVCVARS 'x64*Native*2022.lnk'
@@ -644,7 +652,7 @@ try {
 #        }
     } else {
         Write-Error "Error: Inconsistent VS2017/VS2019/VS2022 options"
-	Exit 3
+    Exit 3
     }
 
     "setlocal" | Out-File -FilePath $rebuild_filename -Append
@@ -706,52 +714,55 @@ try {
     #
 
     pushd "$hercules_dir"
+    if ($GitFolder -ne "") {
+        Write-Output "==> Copy Hercules from git repository at $GitFolder and download other packages"
+        Copy-item -Force -Recurse "$GitFolder" -Destination "$Flavor"
+    } else {
+        Write-Output "==> Clone Hercules from GitHub and download other packages"
+        $input = Read-Host -Prompt 'Press return to continue'
 
-    Write-Output "==> Clone Hercules from GitHub and download other packages"
-    $input = Read-Host -Prompt 'Press return to continue'
+        # If hyperion repo directory already exists, and -ForceClone is
+        # specified, delete it.
+        #
+        if ( Test-Path -Path "$Flavor" -PathType Container ) {
+            if ($ForceClone.IsPresent) {
+                Write-Output "-ForceClone specified: removing existing $Flavor directory"
+                Write-Output ""
 
-    # If hyperion repo directory already exists, and -ForceClone is
-    # specified, delete it.
-    #
-    if ( Test-Path -Path "$Flavor" -PathType Container ) {
-        if ($ForceClone.IsPresent) {
-            Write-Output "-ForceClone specified: removing existing $Flavor directory"
-            Write-Output ""
+                do { $input = Read-Host -Prompt "Remove existing Hercules git repo? [y/N]" }
+                until ("", "yes", "no", "YES", "NO", "y", "Y", "n", "N" -ccontains $input)
 
-            do { $input = Read-Host -Prompt "Remove existing Hercules git repo? [y/N]" }
-            until ("", "yes", "no", "YES", "NO", "y", "Y", "n", "N" -ccontains $input)
-
-            if ( $input.ToLower() -eq 'y') {
-                Remove-Item -path "$Flavor" -Recurse -Force
-            } else {
-                Write-Output "Quitting"
-                Exit 3
+                if ( $input.ToLower() -eq 'y') {
+                    Remove-Item -path "$Flavor" -Recurse -Force
+                } else {
+                    Write-Output "Quitting"
+                    Exit 3
+                }
             }
         }
-    }
 
-    if ( -not (Test-Path -Path "$Flavor" -PathType Container) ) {
-        # (git clone  https://github.com/SDL-Hercules-390/hyperion.git 2>&1) | Out-Default
-        $cmd = "git clone $GitRepo $Flavor"
+        if ( -not (Test-Path -Path "$Flavor" -PathType Container) ) {
+            # (git clone  https://github.com/SDL-Hercules-390/hyperion.git 2>&1) | Out-Default
+            $cmd = "git clone $GitRepo $Flavor"
 
-        if (! [string]::IsNullOrEmpty($GitBranch)) {
-            $cmd = "git clone -b $GitBranch $GitRepo $Flavor"
-        }
+            if (! [string]::IsNullOrEmpty($GitBranch)) {
+                $cmd = "git clone -b $GitBranch $GitRepo $Flavor"
+            }
 
-        Write-Output "$cmd"
-        Invoke-Expression -Command "$cmd"
-
-        if (! [string]::IsNullOrEmpty($GitCommit)) {
-            pushd $Flavor
-            $cmd = "git checkout $GitCommit"
             Write-Output "$cmd"
             Invoke-Expression -Command "$cmd"
-            popd
-        }
-    } else {
-        Write-Output "$Flavor directory exists, skipping 'git clone'."
-    }
 
+            if (! [string]::IsNullOrEmpty($GitCommit)) {
+                pushd $Flavor
+                $cmd = "git checkout $GitCommit"
+                Write-Output "$cmd"
+                Invoke-Expression -Command "$cmd"
+                popd
+            }
+        } else {
+            Write-Output "$Flavor directory exists, skipping 'git clone'."
+        }
+    }
     cd $Flavor
 
     Write-Output "Downloading packages"
