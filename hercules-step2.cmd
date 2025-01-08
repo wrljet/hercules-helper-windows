@@ -21,12 +21,12 @@ set NOPROMPT=%~2
 pushd %HERCULES_HELPER_BUILD_DIR%\%1
 
     set "HERCULES_BUILD_DIR=%cd%\msvc.AMD64.bin"
- :: echo %HERCULES_BUILD_DIR%
+    :: echo %HERCULES_BUILD_DIR%
 
     call "%HERCULES_HELPER_VCVARS_CMD%"
 
- :: echo %INCLUDE%
- :: set INCLUDE=%INCLUDE%;C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include
+    :: echo %INCLUDE%
+    :: set INCLUDE=%INCLUDE%;C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include
 
     echo.
     echo [40;92m==^> Build Hercules[0m

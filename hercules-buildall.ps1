@@ -33,7 +33,7 @@
 [CmdletBinding()]
 Param (
     [Parameter(Mandatory = $false)]
-        [Switch]$SkipVS,
+    [Switch]$SkipVS,
 
     [Parameter(Mandatory = $false)]
     [Switch]$VS2017,
@@ -60,16 +60,16 @@ Param (
     [String]$GitCommit,
 
     [Parameter(Mandatory = $false)]
-        [Switch]$ForceClone,
+    [Switch]$ForceClone,
 
     [Parameter(Mandatory = $false)]
-        [Switch]$Firewall,
+    [Switch]$Firewall,
 
     [Parameter(Mandatory = $false)]
-        [Switch]$ColorText,
+    [Switch]$ColorText,
 
     [Parameter(Mandatory = $false)]
-        [Switch]$NoPrompt
+    [Switch]$NoPrompt
 )
 
 ##############################################################################
@@ -317,7 +317,7 @@ try {
         variables after installing REXX. `
         "
 
-    WriteGreenOutput "        Stop now (Ctrl+C) and install REXX if you've forgotten it."
+        WriteGreenOutput "        Stop now (Ctrl+C) and install REXX if you've forgotten it."
 
         $input = Read-Host -Prompt 'Press return to continue without REXX'
     }
@@ -368,7 +368,7 @@ try {
     }
 
     if ($bzip2_dir_bad -or $pcre_dir_bad -or $zlib_dir_bad) {
-    Exit 3
+        Exit 3
     } else {
         Write-Output ""
     }
@@ -466,7 +466,7 @@ try {
         $workloads = $workloads_2022
     } else {
         Write-Error "Error: Inconsistent VS2017/VS2019/VS2022 options"
-    Exit 3
+        Exit 3
     }
 
     Write-Output ""
@@ -487,7 +487,7 @@ try {
 
         if ($found -eq $null) {
             WriteCustomOutput -ForegroundColor Yellow -BackgroundColor Black -Message `
-            "missing        : $workload"
+                "missing        : $workload"
             $vs_2017_missing = $true
             $vs_2019_missing = $true
             $vs_2022_missing = $true
@@ -569,7 +569,7 @@ try {
         Write-Output "==> Run VS2017 installer (this will take some time)"
         if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
         pushd .\vs2017offline\
-          cmd /c .\vs_community.exe --passive --norestart --wait
+        cmd /c .\vs_community.exe --passive --norestart --wait
         popd
         Write-Output ""
     } elseif ($vs_2019_missing -And $VS2019.IsPresent -And !$SkipVS.IsPresent) {
@@ -583,13 +583,13 @@ try {
         Write-Output "==> VS2019 will require updating.  Ctrl+C now if you don't want that."
 
         pushd .\vs2019offline\
-          Write-Output "==> Run VS2019 installer to update (this will take some time)"
-          if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
-          cmd /c .\vs_community.exe update --passive --norestart --wait
+        Write-Output "==> Run VS2019 installer to update (this will take some time)"
+        if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
+        cmd /c .\vs_community.exe update --passive --norestart --wait
 
-          Write-Output "==> Run VS2019 installer to add missing workloads (this will take some time)"
-          if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
-          cmd /c .\vs_community.exe --passive --norestart --wait
+        Write-Output "==> Run VS2019 installer to add missing workloads (this will take some time)"
+        if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
+        cmd /c .\vs_community.exe --passive --norestart --wait
         popd
         Write-Output ""
     } elseif ($vs_2022_missing -And $VS2022.IsPresent -And !$SkipVS.IsPresent) {
@@ -603,13 +603,13 @@ try {
         Write-Output "==> VS2022 will require updating.  Ctrl+C now if you don't want that."
 
         pushd .\vs2022offline\
-          Write-Output "==> Run VS2022 installer to update (this will take some time)"
-          if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
-          cmd /c .\vs_community.exe update --passive --norestart --wait
+        Write-Output "==> Run VS2022 installer to update (this will take some time)"
+        if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
+        cmd /c .\vs_community.exe update --passive --norestart --wait
 
-          Write-Output "==> Run VS2022 installer to add missing workloads (this will take some time)"
-          if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
-          cmd /c .\vs_community.exe --passive --norestart --wait
+        Write-Output "==> Run VS2022 installer to add missing workloads (this will take some time)"
+        if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
+        cmd /c .\vs_community.exe --passive --norestart --wait
         popd
         Write-Output ""
     } else {
@@ -621,19 +621,19 @@ try {
     # Create user property directory/files if missing
 
     if ($VS2017.IsPresent) {
-    Write-Output "==> Creating VS2017 user property directory if missing"
-    $vcvars_cmd = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+        Write-Output "==> Creating VS2017 user property directory if missing"
+        $vcvars_cmd = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
     } elseif ($VS2019.IsPresent) {
-    Write-Output "==> Creating VS2019 user property directory if missing"
-    $vcvars_cmd = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+        Write-Output "==> Creating VS2019 user property directory if missing"
+        $vcvars_cmd = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
     } elseif ($VS2022.IsPresent) {
-    Write-Output "==> Creating VS2022 user property directory if missing"
+        Write-Output "==> Creating VS2022 user property directory if missing"
 
-    Write-Output "Looking for VCVARS64.BAT via x64*Native*2022.lnk shortcut search"
-    $vcvars = FindVCVARS 'x64*Native*2022.lnk'
-    Write-Output "Found VCVARS64.BAT file : $vcvars"
-    $vcvars_cmd = "$vcvars"
-    $vcvars_cmd = $vcvars_cmd.Replace("`"","")
+        Write-Output "Looking for VCVARS64.BAT via x64*Native*2022.lnk shortcut search"
+        $vcvars = FindVCVARS 'x64*Native*2022.lnk'
+        Write-Output "Found VCVARS64.BAT file : $vcvars"
+        $vcvars_cmd = "$vcvars"
+        $vcvars_cmd = $vcvars_cmd.Replace("`"","")
 
 #        $vcvars_c_cmd = "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
 #        if (Test-Path -Path "$vcvars_c_cmd" -PathType leaf ) {
@@ -647,7 +647,7 @@ try {
 #        }
     } else {
         Write-Error "Error: Inconsistent VS2017/VS2019/VS2022 options"
-    Exit 3
+        Exit 3
     }
 
     "setlocal" | Out-File -FilePath $rebuild_filename -Append
@@ -760,69 +760,69 @@ try {
     Write-Output "Downloading packages"
     $dir = New-Item -ItemType Directory -Force -Path "winbuild"
     pushd winbuild
-        $zipfile = "ZLIB1-1.2.11-bin-lib-inc-vc2008-x86-x64.zip"
-        if (!(Test-Path -Path $zipfile -PathType leaf )) {
-            $cmd = "$wget_exe -nc http://www.softdevlabs.com/downloads/$zipfile"
-            Write-Output $cmd
-            Invoke-Expression -Command "$cmd"
-        } else {
-            Write-Output "$zipfile is already present, not retrieving"
-        }
+    $zipfile = "ZLIB1-1.2.11-bin-lib-inc-vc2008-x86-x64.zip"
+    if (!(Test-Path -Path $zipfile -PathType leaf )) {
+        $cmd = "$wget_exe -nc http://www.softdevlabs.com/downloads/$zipfile"
+        Write-Output $cmd
+        Invoke-Expression -Command "$cmd"
+    } else {
+        Write-Output "$zipfile is already present, not retrieving"
+    }
 
-        $zipfile ="BZIP2-1.0.6-bin-lib-inc-vc2008-x86-x64.zip"
-        if (!(Test-Path -Path $zipfile -PathType leaf )) {
-            $cmd ="$wget_exe -nc http://www.softdevlabs.com/downloads/$zipfile"
-            Write-Output $cmd
-            Invoke-Expression -Command "$cmd"
-            } else {
-            Write-Output "$zipfile is already present, not retrieving"
-        }
+    $zipfile ="BZIP2-1.0.6-bin-lib-inc-vc2008-x86-x64.zip"
+    if (!(Test-Path -Path $zipfile -PathType leaf )) {
+        $cmd ="$wget_exe -nc http://www.softdevlabs.com/downloads/$zipfile"
+        Write-Output $cmd
+        Invoke-Expression -Command "$cmd"
+    } else {
+        Write-Output "$zipfile is already present, not retrieving"
+    }
 
-        $zipfile = "PCRE-6.4.1-bin-lib-inc-vc2008-x86-x64.zip"
-        if (!(Test-Path -Path $zipfile -PathType leaf )) {
-            $cmd = "$wget_exe -nc http://www.softdevlabs.com/downloads/$zipfile"
-            Write-Output $cmd
-            Invoke-Expression -Command "$cmd"
-        } else {
-            Write-Output "$zipfile is already present, not retrieving"
-        }
+    $zipfile = "PCRE-6.4.1-bin-lib-inc-vc2008-x86-x64.zip"
+    if (!(Test-Path -Path $zipfile -PathType leaf )) {
+        $cmd = "$wget_exe -nc http://www.softdevlabs.com/downloads/$zipfile"
+        Write-Output $cmd
+        Invoke-Expression -Command "$cmd"
+    } else {
+        Write-Output "$zipfile is already present, not retrieving"
+    }
 
-        Write-Output ""
-        Write-Output "Unzipping packages"
+    Write-Output ""
+    Write-Output "Unzipping packages"
 
-        # if paths already exist, don't recreate or re-untar
-        if (!(Test-Path 'bzip2')) {
-            $dir = New-Item bzip2 -ItemType Directory -ErrorAction SilentlyContinue
-            pushd bzip2
-                $cmd = "$unzip_exe ..\BZIP2-1.0.6-bin-lib-inc-vc2008-x86-x64.zip 2>&1"
-                Write-Output $cmd
-                Invoke-Expression -Command "$cmd"
-            popd # winbuild
-        } else {
-            Write-Output "bzip2 directory is already present, not un-tarring"
-        }
+    # if paths already exist, don't recreate or re-untar
+    if (!(Test-Path 'bzip2')) {
+        $dir = New-Item bzip2 -ItemType Directory -ErrorAction SilentlyContinue
+        pushd bzip2
+        $cmd = "$unzip_exe ..\BZIP2-1.0.6-bin-lib-inc-vc2008-x86-x64.zip 2>&1"
+        Write-Output $cmd
+        Invoke-Expression -Command "$cmd"
+        popd # winbuild
+    } else {
+        Write-Output "bzip2 directory is already present, not un-tarring"
+    }
 
-        if (!(Test-Path 'zlib')) {
-            $dir = New-Item zlib -ItemType Directory -ErrorAction SilentlyContinue
-            pushd zlib
-                $cmd = "$unzip_exe ..\ZLIB1-1.2.11-bin-lib-inc-vc2008-x86-x64.zip 2>&1"
-                Write-Output $cmd
-                Invoke-Expression -Command "$cmd"
-            popd # winbuild
-        } else {
-            Write-Output "zlib directory is already present, not un-tarring"
-        }
+    if (!(Test-Path 'zlib')) {
+        $dir = New-Item zlib -ItemType Directory -ErrorAction SilentlyContinue
+        pushd zlib
+        $cmd = "$unzip_exe ..\ZLIB1-1.2.11-bin-lib-inc-vc2008-x86-x64.zip 2>&1"
+        Write-Output $cmd
+        Invoke-Expression -Command "$cmd"
+        popd # winbuild
+    } else {
+        Write-Output "zlib directory is already present, not un-tarring"
+    }
 
-        if (!(Test-Path 'pcre')) {
-            $dir = New-Item pcre -ItemType Directory -ErrorAction SilentlyContinue
-            pushd pcre
-                $cmd = "$unzip_exe ..\PCRE-6.4.1-bin-lib-inc-vc2008-x86-x64.zip 2>&1"
-                Write-Output $cmd
-                Invoke-Expression -Command "$cmd"
-            popd # winbuild
-        } else {
-            Write-Output "pcre directory is already present, not un-tarring"
-        }
+    if (!(Test-Path 'pcre')) {
+        $dir = New-Item pcre -ItemType Directory -ErrorAction SilentlyContinue
+        pushd pcre
+        $cmd = "$unzip_exe ..\PCRE-6.4.1-bin-lib-inc-vc2008-x86-x64.zip 2>&1"
+        Write-Output $cmd
+        Invoke-Expression -Command "$cmd"
+        popd # winbuild
+    } else {
+        Write-Output "pcre directory is already present, not un-tarring"
+    }
 
     popd # hyperion
     Write-Output ""
