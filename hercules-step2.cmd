@@ -1,7 +1,7 @@
 :: hercules-step2.cmd -- Part of Hercules-Helper
 ::
 :: Hercules builder
-:: Updated: 01 JUN 2021
+:: Updated: 27 JAN 2025
 ::
 :: The most recent version of this project can be obtained with:
 ::   git clone https://github.com/wrljet/hercules-helper.git
@@ -15,6 +15,9 @@
 :: Called from hercules-buildall.ps1, from the hercules-helper\windows directory
 
 @if defined TRACEON (@echo on) else (@echo off)
+
+setlocal
+set "rc=0"
 
 echo Starting Hercules-Step 2...
 
@@ -34,13 +37,21 @@ pushd %HERCULES_HELPER_BUILD_DIR%\%1
 
     call makefile.bat RETAIL-X64 makefile.msvc 8 -title "*** Hercules-Helper Test Build ***" -a
 
-    echo.
-    echo [40;92m Just FYI: Windows Defender anti-malware may cause the tests to fail or hang. [0m
-    echo.
-    echo [40;92m==^> Run Tests - Press return to continue ...[0m
-    set /P dummy=
+:: Check return code from above before continuing
+    set "rc=%errorlevel%"
+    echo "ErrorLevel from build: %rc%"
+    if %rc% equ 0 (
+        echo.
+        echo [40;92m Just FYI: Windows Defender anti-malware may cause the tests to fail or hang. [0m
+        echo.
+        echo [40;92m==^> Run Tests - Press return to continue ...[0m
+        set /P dummy=
 
-    call tests\runtest.cmd -n * -t 2 -d ..\%1\tests
+        call tests\runtest.cmd -n * -t 2 -d ..\%1\tests
+        set "rc=%errorlevel%"
+    ) else (
+        echo BUILD FAILED! Skipping tests
+    )
 
 popd
 :: back to builder
@@ -50,3 +61,4 @@ echo Hercules-Step2 phase completed!
 echo Returning to PowerShell
 echo.
 
+endlocal & exit /b %rc%

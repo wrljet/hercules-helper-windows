@@ -1,7 +1,7 @@
 # hercules-buildall.ps1 -- Part of Hercules-Helper
 #
 # Hercules builder
-# Updated: 29 NOV 2024
+# Updated: 27 JAN 2025
 #
 # The most recent version of this project can be obtained with:
 #   git clone https://github.com/wrljet/hercules-helper-windows.git
@@ -854,6 +854,12 @@ try {
     # Invoke-Expression -Command "cmd /c hercules-step2.cmd"
     # cmd.exe /c hercules-step2.cmd 2`>`&1 | Tee-Object -FilePath "hercules-helper-build.log"
     cmd.exe /c hercules-step2.cmd $Flavor 2`>`&1 | Tee-Object -Variable dummy
+
+    if ($LASTEXITCODE -ne 0) {
+        Write-Output "... BUILD FAILED!"
+        Write-Output "LASTEXITCODE from build process: $LASTEXITCODE"
+        Write-Output ""
+    }
 
     Write-Output "... back from build steps"
     Write-Output ""
