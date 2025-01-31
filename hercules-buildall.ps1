@@ -788,7 +788,7 @@ try {
     } else {
         Write-Output "$Flavor directory exists, skipping '$gethow'."
     }
-    Remove-Variable -Name getfrom, gethow, getto
+    Remove-Variable -Name getfrom, gethow, getto, getverb
 
     cd $Flavor
 
