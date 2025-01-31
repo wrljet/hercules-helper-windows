@@ -51,6 +51,9 @@ Param (
     [String]$Flavor,
 
     [Parameter(Mandatory = $false)]
+    [String]$SourceDir,
+
+    [Parameter(Mandatory = $false)]
     [String]$GitRepo,
 
     [Parameter(Mandatory = $false)]
@@ -240,33 +243,50 @@ try {
         $Flavor = "aethra"
     }
 
-    if (! [string]::IsNullOrEmpty($GitRepo)) {
-        Write-Output "-GitRepo: $GitRepo"
-    } else {
-        if ( $Flavor -eq 'sdl-hyperion') {
-            $GitRepo = "https://github.com/SDL-Hercules-390/hyperion.git"
-        } elseif ( $Flavor -eq 'aethra') {
-            $GitRepo = "https://github.com/Hercules-Aethra/aethra.git"
-        } else {
-            $GitRepo = "https://github.com/SDL-Hercules-390/hyperion.git"
+    if (! [string]::IsNullOrEmpty($SourceDir)) {
+        Write-Output "-SourceDir: $SourceDir"
+        ":: SourceDir = $SourceDir" | Out-File -FilePath $rebuild_filename -Append
+        if (! [string]::IsNullOrEmpty($GitRepo)) {
+            Write-Error "Error: -GitRepo is incompatible with -SourceDir"
+            Exit 3
         }
-    }
+        if (! [string]::IsNullOrEmpty($GitBranch)) {
+            Write-Error "Error: -GitBranch is incompatible with -SourceDir"
+            Exit 3
+        }
+        if (! [string]::IsNullOrEmpty($GitCommit)) {
+            Write-Error "Error: -GitCommit is incompatible with -SourceDir"
+            Exit 3
+        }
+    } else {
+        if (! [string]::IsNullOrEmpty($GitRepo)) {
+            Write-Output "-GitRepo: $GitRepo"
+        } else {
+            if ( $Flavor -eq 'sdl-hyperion') {
+                $GitRepo = "https://github.com/SDL-Hercules-390/hyperion.git"
+            } elseif ( $Flavor -eq 'aethra') {
+                $GitRepo = "https://github.com/Hercules-Aethra/aethra.git"
+            } else {
+                $GitRepo = "https://github.com/SDL-Hercules-390/hyperion.git"
+            }
+        }
 
-    ":: GitRepo = $GitRepo" | Out-File -FilePath $rebuild_filename -Append
+        ":: GitRepo = $GitRepo" | Out-File -FilePath $rebuild_filename -Append
 
-    if (! [string]::IsNullOrEmpty($GitBranch)) {
-        Write-Output "-GitBranch: $GitBranch"
-        ":: GitBranch = $GitBranch" | Out-File -FilePath $rebuild_filename -Append
-    }
+        if (! [string]::IsNullOrEmpty($GitBranch)) {
+            Write-Output "-GitBranch: $GitBranch"
+            ":: GitBranch = $GitBranch" | Out-File -FilePath $rebuild_filename -Append
+        }
 
-    if (! [string]::IsNullOrEmpty($GitCommit)) {
-        Write-Output "-GitCommit: $GitCommit"
-        ":: GitCommit = $GitCommit" | Out-File -FilePath $rebuild_filename -Append
-    }
+        if (! [string]::IsNullOrEmpty($GitCommit)) {
+            Write-Output "-GitCommit: $GitCommit"
+            ":: GitCommit = $GitCommit" | Out-File -FilePath $rebuild_filename -Append
+        }
 
-    if ($ForceClone.IsPresent) {
-        Write-Output "-ForceClone: Git repo will be overwritten"
-        ":: ForceClone = yes" | Out-File -FilePath $rebuild_filename -Append
+        if ($ForceClone.IsPresent) {
+            Write-Output "-ForceClone: Git repo will be overwritten"
+            ":: ForceClone = yes" | Out-File -FilePath $rebuild_filename -Append
+        }
     }
 
     Write-Output ""
@@ -709,7 +729,18 @@ try {
 
     pushd "$hercules_dir"
 
-    Write-Output "==> Clone Hercules from GitHub and download other packages"
+    if ($SourceDir -ne "") {
+        $getfrom = "$SourceDir directory"
+        $gethow = "Copy-item"
+        $getto = "$Flavor directory"
+        $getverb = "Copy"
+    } else {
+        $getfrom = "GitHub"
+        $gethow = "git clone"
+        $getto = "git repo"
+        $getverb = "Clone"
+    }
+    Write-Output "==> $getverb Hercules from $getfrom and download other packages"
     if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
 
     # If hyperion repo directory already exists, and -ForceClone is
@@ -720,7 +751,7 @@ try {
             Write-Output "-ForceClone specified: removing existing $Flavor directory"
             Write-Output ""
 
-            do { $input = Read-Host -Prompt "Remove existing Hercules git repo? [y/N]" }
+            do { $input = Read-Host -Prompt "Remove existing Hercules $getto? [y/N]" }
             until ("", "yes", "no", "YES", "NO", "y", "Y", "n", "N" -ccontains $input)
 
             if ( $input.ToLower() -eq 'y') {
@@ -733,26 +764,31 @@ try {
     }
 
     if ( -not (Test-Path -Path "$Flavor" -PathType Container) ) {
-        # (git clone  https://github.com/SDL-Hercules-390/hyperion.git 2>&1) | Out-Default
-        $cmd = "git clone $GitRepo $Flavor"
+        if ($SourceDir -ne "") {
+            Copy-item -Force -Recurse "$SourceDir" -Destination "$Flavor"
+        } else {
+            # (git clone  https://github.com/SDL-Hercules-390/hyperion.git 2>&1) | Out-Default
+            $cmd = "git clone $GitRepo $Flavor"
 
-        if (! [string]::IsNullOrEmpty($GitBranch)) {
-            $cmd = "git clone -b $GitBranch $GitRepo $Flavor"
-        }
+            if (! [string]::IsNullOrEmpty($GitBranch)) {
+                $cmd = "git clone -b $GitBranch $GitRepo $Flavor"
+            }
 
-        Write-Output "$cmd"
-        Invoke-Expression -Command "$cmd"
-
-        if (! [string]::IsNullOrEmpty($GitCommit)) {
-            pushd $Flavor
-            $cmd = "git checkout $GitCommit"
             Write-Output "$cmd"
             Invoke-Expression -Command "$cmd"
-            popd
+
+            if (! [string]::IsNullOrEmpty($GitCommit)) {
+                pushd $Flavor
+                $cmd = "git checkout $GitCommit"
+                Write-Output "$cmd"
+                Invoke-Expression -Command "$cmd"
+                popd
+            }
         }
     } else {
-        Write-Output "$Flavor directory exists, skipping 'git clone'."
+        Write-Output "$Flavor directory exists, skipping '$gethow'."
     }
+    Remove-Variable -Name getfrom, gethow, getto
 
     cd $Flavor
 
