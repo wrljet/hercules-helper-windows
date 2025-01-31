@@ -226,11 +226,11 @@ try {
 
     if (! [string]::IsNullOrEmpty($Flavor)) {
         if ( $Flavor.ToLower() -eq 'sdl-hyperion' -Or $Flavor.ToLower() -eq 'sdl-hercules') {
-            Write-Output "-Flavor: SDL-Hyperion"
+            Write-Output "-Flavor  : SDL-Hyperion"
             ":: Build flavor = SDL-Hyperion" | Out-File -FilePath $rebuild_filename -Append
             $Flavor = "sdl-hyperion"
         } elseif ( $Flavor.ToLower() -eq 'aethra') {
-            Write-Output "-Flavor: Aethra"
+            Write-Output "-Flavor  : Aethra"
             ":: Build flavor = Aethra" | Out-File -FilePath $rebuild_filename -Append
             $Flavor = "aethra"
         } else {
