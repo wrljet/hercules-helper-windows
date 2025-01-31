@@ -1,7 +1,7 @@
 :: hercules-step2.cmd -- Part of Hercules-Helper
 ::
 :: Hercules builder
-:: Updated: 27 JAN 2025
+:: Updated: 30 JAN 2025
 ::
 :: The most recent version of this project can be obtained with:
 ::   git clone https://github.com/wrljet/hercules-helper.git
@@ -19,7 +19,8 @@
 setlocal
 set "rc=0"
 
-echo Starting Hercules-Step 2...
+set NOPROMPT=%~2
+@echo Starting Hercules-Step 2...
 
 pushd %HERCULES_HELPER_BUILD_DIR%\%1
 
@@ -32,8 +33,10 @@ pushd %HERCULES_HELPER_BUILD_DIR%\%1
  :: set INCLUDE=%INCLUDE%;C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include
 
     echo.
-    echo [40;92m==^> Build Hercules - Press return to continue ...[0m
-    set /P dummy=
+    if "%NOPROMPT%" neq "True" (
+        echo [40;92m==^> Build Hercules - Press return to continue ...[0m
+        set /P dummy=
+    )
 
     call makefile.bat RETAIL-X64 makefile.msvc 8 -title "*** Hercules-Helper Test Build ***" -a
 
@@ -44,8 +47,10 @@ pushd %HERCULES_HELPER_BUILD_DIR%\%1
         echo.
         echo [40;92m Just FYI: Windows Defender anti-malware may cause the tests to fail or hang. [0m
         echo.
-        echo [40;92m==^> Run Tests - Press return to continue ...[0m
-        set /P dummy=
+        if "%NOPROMPT%" neq "True" (
+            echo [40;92m==^> Run Tests - Press return to continue ...[0m
+            set /P dummy=
+        )
 
         call tests\runtest.cmd -n * -t 2 -d ..\%1\tests
         set "rc=%errorlevel%"

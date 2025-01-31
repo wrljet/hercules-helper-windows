@@ -149,6 +149,9 @@ add the ```-ForceClone``` option to the command line.
 If the ```-Firewall``` option is specified, Windows Firewall rules
 to allow Hercules will be added.
 
+```-NoPrompt``` will skip the 'Press return to continue' prompts
+except for overwriting an existing repo.
+
 From here on everything should be completely automatic.
 
 You will be prompted to hit the Enter key a number of times,

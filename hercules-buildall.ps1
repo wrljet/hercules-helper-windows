@@ -33,41 +33,43 @@
 [CmdletBinding()]
 Param (
     [Parameter(Mandatory = $false)]
-        [Switch]$SkipVS,
+    [Switch]$SkipVS,
 
     [Parameter(Mandatory = $false)]
-        [Switch]$VS2017,
+    [Switch]$VS2017,
 
     [Parameter(Mandatory = $false)]
-        [Switch]$VS2019,
+    [Switch]$VS2019,
 
     [Parameter(Mandatory = $false)]
-        [Switch]$VS2022,
+    [Switch]$VS2022,
 
     [Parameter(Mandatory = $false)]
-        [String]$BuildDir,
+    [String]$BuildDir,
 
     [Parameter(Mandatory = $false)]
-        [String]$Flavor,
+    [String]$Flavor,
 
     [Parameter(Mandatory = $false)]
-        [String]$GitRepo,
+    [String]$GitRepo,
 
     [Parameter(Mandatory = $false)]
-        [String]$GitBranch,
+    [String]$GitBranch,
 
     [Parameter(Mandatory = $false)]
-        [String]$GitCommit,
+    [String]$GitCommit,
 
     [Parameter(Mandatory = $false)]
-        [Switch]$ForceClone,
+    [Switch]$ForceClone,
 
     [Parameter(Mandatory = $false)]
-        [Switch]$Firewall,
+    [Switch]$Firewall,
 
     [Parameter(Mandatory = $false)]
-        [Switch]$ColorText
-)
+    [Switch]$ColorText,
+
+    [Parameter(Mandatory = $false)]
+    [Switch]$NoPrompt)
 
 ##############################################################################
 #
@@ -378,7 +380,7 @@ try {
     Write-Output ""
 
     Write-Output "==> Begin ..."
-    $input = Read-Host -Prompt 'Press return to continue'
+    if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
 
     ##############################################################################
     # Check for existing VS2017 and required workloads
@@ -557,21 +559,21 @@ try {
 
     if ($vs_2017_missing -And $VS2017.IsPresent -And !$SkipVS.IsPresent) {
         Write-Output "==> Create/update VS2017 installer (this will take some time)"
-        $input = Read-Host -Prompt 'Press return to continue'
+        if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
 
         # Create an offline installer for Visual Studio 2017
         .\create-vs2017-offline.ps1
         Write-Output ""
 
         Write-Output "==> Run VS2017 installer (this will take some time)"
-        $input = Read-Host -Prompt 'Press return to continue'
+        if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
         pushd .\vs2017offline\
           cmd /c .\vs_community.exe --passive --norestart --wait
         popd
         Write-Output ""
     } elseif ($vs_2019_missing -And $VS2019.IsPresent -And !$SkipVS.IsPresent) {
         Write-Output "==> Create/update VS2019 installer (this will take some time)"
-        $input = Read-Host -Prompt 'Press return to continue'
+        if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
 
         # Create an offline installer for Visual Studio 2019
         .\create-vs2019-offline.ps1
@@ -581,17 +583,17 @@ try {
 
         pushd .\vs2019offline\
           Write-Output "==> Run VS2019 installer to update (this will take some time)"
-          $input = Read-Host -Prompt 'Press return to continue'
+          if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
           cmd /c .\vs_community.exe update --passive --norestart --wait
 
           Write-Output "==> Run VS2019 installer to add missing workloads (this will take some time)"
-          $input = Read-Host -Prompt 'Press return to continue'
+          if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
           cmd /c .\vs_community.exe --passive --norestart --wait
         popd
         Write-Output ""
     } elseif ($vs_2022_missing -And $VS2022.IsPresent -And !$SkipVS.IsPresent) {
         Write-Output "==> Create/update VS2022 installer (this will take some time)"
-        $input = Read-Host -Prompt 'Press return to continue'
+        if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
 
         # Create an offline installer for Visual Studio 2022
         .\create-vs2022-offline.ps1
@@ -601,11 +603,11 @@ try {
 
         pushd .\vs2022offline\
           Write-Output "==> Run VS2022 installer to update (this will take some time)"
-          $input = Read-Host -Prompt 'Press return to continue'
+          if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
           cmd /c .\vs_community.exe update --passive --norestart --wait
 
           Write-Output "==> Run VS2022 installer to add missing workloads (this will take some time)"
-          $input = Read-Host -Prompt 'Press return to continue'
+          if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
           cmd /c .\vs_community.exe --passive --norestart --wait
         popd
         Write-Output ""
@@ -652,7 +654,7 @@ try {
     "set HERCULES_HELPER_BUILD_DIR=$hercules_dir" | Out-File -FilePath $rebuild_filename -Append
     "set HERCULES_HELPER_VCVARS_CMD=$vcvars_cmd" | Out-File -FilePath $rebuild_filename -Append
 
-    $input = Read-Host -Prompt 'Press return to continue'
+    if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
 
     $props_dir = "$HOME\AppData\Local\Microsoft\MSBuild\v4.0"
     Write-Output "Visual Studio User Properties directory: $props_dir"
@@ -679,7 +681,7 @@ try {
 
             WriteGreenOutput "        Stop now (Ctrl+C) to edit the props file."
 
-            $input = Read-Host -Prompt 'Press return to continue'
+            if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
         }
     }
 
@@ -708,7 +710,7 @@ try {
     pushd "$hercules_dir"
 
     Write-Output "==> Clone Hercules from GitHub and download other packages"
-    $input = Read-Host -Prompt 'Press return to continue'
+    if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
 
     # If hyperion repo directory already exists, and -ForceClone is
     # specified, delete it.
@@ -853,7 +855,7 @@ try {
     # cmd /k "$vcvars_cmd"
     # Invoke-Expression -Command "cmd /c hercules-step2.cmd"
     # cmd.exe /c hercules-step2.cmd 2`>`&1 | Tee-Object -FilePath "hercules-helper-build.log"
-    cmd.exe /c hercules-step2.cmd $Flavor 2`>`&1 | Tee-Object -Variable dummy
+    cmd.exe /c hercules-step2.cmd $Flavor $NoPrompt 2`>`&1 | Tee-Object -Variable dummy
 
     if ($LASTEXITCODE -ne 0) {
         Write-Output "... BUILD FAILED!"
@@ -866,8 +868,8 @@ try {
 
     ##############################################################################
     if ($Firewall.IsPresent) {
-        Write-Output '==> Windows Firewall rules - Press return to continue'
-        $input = Read-Host -Prompt 'Press return to continue'
+        Write-Output '==> Windows Firewall rules'
+        if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
 
         $hercules_exedir = Resolve-Path "$hercules_dir\$Flavor\msvc.AMD64.bin"
         # Write-Output "Hercules exe directory : $hercules_exedir"
@@ -899,7 +901,7 @@ try {
 
                     Write-Output ""
                     Write-Output "Windows Firewall rules have been created."
-                    $input = Read-Host -Prompt 'Press return to continue'
+                    if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
                 }
             }
         }
