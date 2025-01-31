@@ -146,11 +146,21 @@ The script will not overwrite an existing git clone directory,
 to protect local changes you may have.  To force an overwrite,
 add the ```-ForceClone``` option to the command line.
 
+Say you wanted to be able to build Hercules without committing changes to your clone of
+the SDL Hyperion repo...
+
+Use the ```-SourceDir``` option to specify the location of the directory where the source code
+should be copied from. After the copying, all processing is just the same as if the
+code had been cloned from GitHub.  Thank you to Ross Patterson for this feature.
+
+```-SourceDir``` is mutually incompatible with ```-GitRepo```, ```-GitBranch```, and ```-GitCommit```,
+and the code reports an error and quits if they are specified together.
+
 If the ```-Firewall``` option is specified, Windows Firewall rules
 to allow Hercules will be added.
 
 ```-NoPrompt``` will skip the 'Press return to continue' prompts
-except for overwriting an existing repo.
+except for overwriting an existing repo.  Thank you to Ross Patterson for this feature.
 
 From here on everything should be completely automatic.
 
