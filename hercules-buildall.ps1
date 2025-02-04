@@ -1,7 +1,7 @@
 # hercules-buildall.ps1 -- Part of Hercules-Helper
 #
 # Hercules builder
-# Updated: 30 JAN 2025
+# Updated: 04 FEB 2025
 #
 # The most recent version of this project can be obtained with:
 #   git clone https://github.com/wrljet/hercules-helper-windows.git
@@ -397,6 +397,16 @@ try {
     (systeminfo /fo csv | ConvertFrom-Csv | select 'OS Name', 'OS Version' | Format-List | Out-String).Trim()
     $ver = $psversiontable.PSVersion.ToString()
     Write-Output "Powershell : $ver"
+    Write-Output ""
+
+    Write-Output "Language List: "
+    (Get-WinUserLanguageList).LocalizedName
+    Write-Output "Locale     : "
+    Get-WinSystemLocale
+    Write-Output ""
+
+    $cpuInfo = Get-CimInstance -ClassName Win32_Processor
+    Write-Output "CPU Info   : $cpuInfo"
     Write-Output ""
 
     Write-Output "==> Begin ..."
