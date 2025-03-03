@@ -1,7 +1,7 @@
 # hercules-buildall.ps1 -- Part of Hercules-Helper
 #
 # Hercules builder
-# Updated: 11 FEB 2025
+# Updated: 03 MAR 2025
 #
 # The most recent version of this project can be obtained with:
 #   git clone https://github.com/wrljet/hercules-helper-windows.git
@@ -77,6 +77,8 @@ Param (
 ##############################################################################
 #
 
+$DebugInfo = $false
+
 $goodies_dir = ".\goodies"
 $goodies_dir = Resolve-Path "$goodies_dir"
 $consoleout_exe = "$goodies_dir\wrljet\consoleout.exe"
@@ -111,36 +113,36 @@ Function WriteGreenOutput($message)
 Function FindVCVARS($pattern)
 {
 
-#Write-Output "FindVCVARS(): pattern: $pattern" | out-host
+if ($DebugInfo) { Write-Output "FindVCVARS(): pattern: $pattern" | out-host }
 
 # $link = Get-ChildItem -Path "C:\ProgramData\Microsoft\Windows\Start Menu" -Recurse -File -Filter "x64*Native*2022.lnk"
     $link = Get-ChildItem -Path "C:\ProgramData\Microsoft\Windows\Start Menu" -Recurse -File -Filter $pattern
 
 # C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Visual Studio 2022\Visual Studio Tools\VC\x64 Native Tools Command Prompt for VS 2022.lnk
 
-#Write-Output "FindVCVARS(): link: $link" | out-host
+if ($DebugInfo) { Write-Output "FindVCVARS(): link: $link" | out-host }
 
     $fullname = $link.FullName
-#Write-Output "FindVCVARS(): link.FullName: $fullname" | out-host
+if ($DebugInfo) { Write-Output "FindVCVARS(): link.FullName: $fullname" | out-host }
 
     $sh = New-Object -ComObject WScript.Shell
     $shortcut = $sh.CreateShortcut($link.FullName)
-#Write-Output "FindVCVARS(): shortcut:" | out-host
-#Write-Output $shortcut | out-host
+if ($DebugInfo) { Write-Output "FindVCVARS(): shortcut:" | out-host }
+if ($DebugInfo) { Write-Output $shortcut | out-host }
 
 # /k "E:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
 
     $arguments = $shortcut.Arguments
-#Write-Output "FindVCVARS(): arguments: $arguments" | out-host
+if ($DebugInfo) { Write-Output "FindVCVARS(): arguments: $arguments" | out-host }
 
 #   'matching : '
     if ($shortcut.Arguments -match '"\w:.*$') {
         $vcvars = $Matches[0]
     } else {
-        Write-Output 'Match for vcvars64.bat failed' | out-host
+        Write-Output 'Match for vcvars failed' | out-host
     }
 
-#Write-Output "FindVCVARS(): vcvars: $vcvars" | out-host
+if ($DebugInfo) { Write-Output "FindVCVARS(): vcvars: $vcvars" | out-host }
     return $vcvars.ToString();
 }
 
@@ -407,6 +409,18 @@ try {
     Write-Output "CPU Info   : $cpuInfo"
     Write-Output ""
 
+    $wmic = Invoke-Expression "wmic os get osarchitecture"
+    Write-Output "wmic os get osarchitecture"
+    Write-Output "$wmic"
+    if ($wmic -match "32") {
+        $bitness = 32
+        $CpuArch = "x86"
+    } else {
+        $bitness = 64
+        $CpuArch = "x64"
+    }
+
+    Write-Output ""
     Write-Output "==> Begin ..."
     if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
 
@@ -649,18 +663,25 @@ try {
 
     if ($VS2017.IsPresent) {
         Write-Output "==> Creating VS2017 user property directory if missing"
-        $vcvars_cmd = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+        $vcvars_cmd = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars$CpuArch.bat"
     } elseif ($VS2019.IsPresent) {
         Write-Output "==> Creating VS2019 user property directory if missing"
-        $vcvars_cmd = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+        $vcvars_cmd = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars$CpuArch.bat"
+
+        Write-Output "Looking for VCVARS$bitness.BAT via $CpuArch*Native*2019.lnk shortcut search"
+        Write-Output ("$CpuArch" + '*Native*2019.lnk')
+        $vcvars = FindVCVARS ("$CpuArch" + '*Native*2019.lnk')
+        Write-Output "Found VCVARS$bitness.BAT file : $vcvars"
+        $vcvars_cmd = "$vcvars"
+        $vcvars_cmd = $vcvars_cmd.Replace("`"","")
     } elseif ($VS2022.IsPresent) {
         Write-Output "==> Creating VS2022 user property directory if missing"
 
-    Write-Output "Looking for VCVARS64.BAT via x64*Native*2022.lnk shortcut search"
-    $vcvars = FindVCVARS 'x64*Native*2022.lnk'
-    Write-Output "Found VCVARS64.BAT file : $vcvars"
-    $vcvars_cmd = "$vcvars"
-    $vcvars_cmd = $vcvars_cmd.Replace("`"","")
+        Write-Output "Looking for VCVARS$bitness.BAT via $CpuArch*Native*2022.lnk shortcut search"
+        $vcvars = FindVCVARS 'x64*Native*2022.lnk'
+        Write-Output "Found VCVARS$bitness.BAT file : $vcvars"
+        $vcvars_cmd = "$vcvars"
+        $vcvars_cmd = $vcvars_cmd.Replace("`"","")
 
 #        $vcvars_c_cmd = "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
 #        if (Test-Path -Path "$vcvars_c_cmd" -PathType leaf ) {
@@ -899,7 +920,7 @@ try {
     # cmd /k "$vcvars_cmd"
     # Invoke-Expression -Command "cmd /c hercules-step2.cmd"
     # cmd.exe /c hercules-step2.cmd 2`>`&1 | Tee-Object -FilePath "hercules-helper-build.log"
-    cmd.exe /c hercules-step2.cmd $Flavor $NoPrompt 2`>`&1 | Tee-Object -Variable dummy
+    cmd.exe /c hercules-step2.cmd $Flavor $CpuArch.ToUpper() $NoPrompt 2`>`&1 | Tee-Object -Variable dummy
 
     if ($LASTEXITCODE -ne 0) {
         Write-Output "... BUILD FAILED!"
