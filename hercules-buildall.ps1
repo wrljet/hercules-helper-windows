@@ -1,7 +1,7 @@
 # hercules-buildall.ps1 -- Part of Hercules-Helper
 #
 # Hercules builder
-# Updated: 03 MAR 2025
+# Updated: 09 MAR 2025
 #
 # The most recent version of this project can be obtained with:
 #   git clone https://github.com/wrljet/hercules-helper-windows.git
@@ -662,22 +662,30 @@ try {
     # Create user property directory/files if missing
 
     if ($VS2017.IsPresent) {
-        Write-Output "==> Creating VS2017 user property directory if missing"
-        $vcvars_cmd = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars$CpuArch.bat"
+        $vcver = "2017"
+        Write-Output "==> Creating VS$vcver user property directory if missing"
+        Write-Output "Looking for VCVARS$bitness.BAT via $CpuArch*Native*$vcver.lnk shortcut search"
+        # Write-Output ("$CpuArch" + '*Native*2017.lnk')
+        $vcvars = FindVCVARS ("$CpuArch" + '*Native*2017.lnk')
+        Write-Output "Found VCVARS$bitness.BAT file : $vcvars"
+        $vcvars_cmd = "$vcvars"
+        $vcvars_cmd = $vcvars_cmd.Replace("`"","")
     } elseif ($VS2019.IsPresent) {
-        Write-Output "==> Creating VS2019 user property directory if missing"
-        $vcvars_cmd = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars$CpuArch.bat"
+        $vcver = "2019"
+        Write-Output "==> Creating VS$vcver user property directory if missing"
+        # $vcvars_cmd = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars$CpuArch.bat"
 
-        Write-Output "Looking for VCVARS$bitness.BAT via $CpuArch*Native*2019.lnk shortcut search"
-        Write-Output ("$CpuArch" + '*Native*2019.lnk')
+        Write-Output "Looking for VCVARS$bitness.BAT via $CpuArch*Native*$vcver.lnk shortcut search"
+        # Write-Output ("$CpuArch" + '*Native*2019.lnk')
         $vcvars = FindVCVARS ("$CpuArch" + '*Native*2019.lnk')
         Write-Output "Found VCVARS$bitness.BAT file : $vcvars"
         $vcvars_cmd = "$vcvars"
         $vcvars_cmd = $vcvars_cmd.Replace("`"","")
     } elseif ($VS2022.IsPresent) {
-        Write-Output "==> Creating VS2022 user property directory if missing"
+        $vcver = "2019"
+        Write-Output "==> Creating VS$vcver user property directory if missing"
 
-        Write-Output "Looking for VCVARS$bitness.BAT via $CpuArch*Native*2022.lnk shortcut search"
+        Write-Output "Looking for VCVARS$bitness.BAT via $CpuArch*Native*$vcver.lnk shortcut search"
         $vcvars = FindVCVARS 'x64*Native*2022.lnk'
         Write-Output "Found VCVARS$bitness.BAT file : $vcvars"
         $vcvars_cmd = "$vcvars"
