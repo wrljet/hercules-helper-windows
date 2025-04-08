@@ -1,7 +1,7 @@
 # hercules-buildall.ps1 -- Part of Hercules-Helper
 #
 # Hercules builder
-# Updated: 09 MAR 2025
+# Updated: 08 APR 2025
 #
 # The most recent version of this project can be obtained with:
 #   git clone https://github.com/wrljet/hercules-helper-windows.git
@@ -332,7 +332,7 @@ try {
         `
         REXX will be needed to run the Hercules instruction tests after building. `
         `
-        The ooRexx v5.0.0 installer may be found in the 'goodies' directory. `
+        The ooRexx v5.0.0 installer (64-bit) may be found in the 'goodies' directory. `
         `
         You will need to restart PowerShell to get a fresh set of environment `
         variables after installing REXX. `
@@ -409,13 +409,13 @@ try {
     Write-Output "CPU Info   : $cpuInfo"
     Write-Output ""
 
-    $wmic = Invoke-Expression "wmic os get osarchitecture"
-    Write-Output "wmic os get osarchitecture"
-    Write-Output "$wmic"
-    if ($wmic -match "32") {
+    # Write-Output "wmic os get osarchitecture"
+    if ((Get-WmiObject Win32_OperatingSystem | Select-Object OSArchitecture) -match "32") {
+        # Write-Output "found 32-bit system"
         $bitness = 32
         $CpuArch = "x86"
     } else {
+        # Write-Output "found 64-bit system"
         $bitness = 64
         $CpuArch = "x64"
     }
@@ -427,7 +427,7 @@ try {
     ##############################################################################
     # Check for existing VS2017 and required workloads
     #
-    Write-Output "Checking for existing VS2017 15.9, VS2019 16.11, or VS2022 17.12 required workloads ..."
+    Write-Output "Checking for existing VS2017 15.9, VS2019 16.11, or VS2022 17.13 required workloads ..."
     Write-Output ""
     WriteGreenOutput "Note: Visual Studio 2017, 2019, and 2022 will peacefully coexist."
     Write-Output ""
@@ -548,12 +548,12 @@ try {
                     # Write-Output "16.11 version found"
                     $workload_2019_found = $true
                     $vs2019_found = $true
-                } elseif ($ff.StartsWith('17.12')) {
-                    # Write-Output "17.12 version found"
+                } elseif ($ff.StartsWith('17.13')) {
+                    # Write-Output "17.13 version found"
                     $workload_2022_found = $true
                     $vs2022_found = $true
                 } else {
-                    # Write-Output "not            : VS2017 15.9, VS2019 16.11, or VS2022 17.12 version"
+                    # Write-Output "not            : VS2017 15.9, VS2019 16.11, or VS2022 17.13 version"
                 }
             }
 
@@ -572,7 +572,7 @@ try {
             if ($VS2022.IsPresent -And !$workload_2022_found) {
                 $vs_2022_missing = $true
                 WriteCustomOutput -ForegroundColor Yellow -BackgroundColor Black -Message `
-                    "missing VS2022 17.12 : $workload"
+                    "missing VS2022 17.13 : $workload"
             }
         }
     }
@@ -682,7 +682,7 @@ try {
         $vcvars_cmd = "$vcvars"
         $vcvars_cmd = $vcvars_cmd.Replace("`"","")
     } elseif ($VS2022.IsPresent) {
-        $vcver = "2019"
+        $vcver = "2022"
         Write-Output "==> Creating VS$vcver user property directory if missing"
 
         Write-Output "Looking for VCVARS$bitness.BAT via $CpuArch*Native*$vcver.lnk shortcut search"
