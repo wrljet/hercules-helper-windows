@@ -1,7 +1,7 @@
 # hercules-buildall.ps1 -- Part of Hercules-Helper
 #
 # Hercules builder
-# Updated: 10 SEP 2025
+# Updated: 11 SEP 2025
 #
 # The most recent version of this project can be obtained with:
 #   git clone https://github.com/wrljet/hercules-helper-windows.git
@@ -19,7 +19,7 @@
 #    Works  on Windows 7 Enterprise (not routinely tested)
 #    Tested with PowerShell 5.1, 7.1.3, and 7.3.8
 #
-# Works with Visual Studio 2017, 2019, and 2022 Community Edition
+# Works with Visual Studio 2017, 2019, 2022, and 2026 Community Edition
 # in C:\Program Files (x86)\Microsoft Visual Studio\201x\Community
 
 # Set-PSDebug -Trace 1
@@ -43,6 +43,9 @@ Param (
 
     [Parameter(Mandatory = $false)]
     [Switch]$VS2022,
+
+    [Parameter(Mandatory = $false)]
+    [Switch]$VS2026,
 
     [Parameter(Mandatory = $false)]
     [String]$BuildDir,
@@ -198,11 +201,11 @@ try {
         Write-Output "-SkipVS: Skipping Visual Studio installation/update"
     }
 
-    if ($VS2017.IsPresent + $VS2019.IsPresent + $VS2022.IsPresent -Eq 0) {
-        Write-Error "Error: Must specify either -VS2017, -VS2019, or -VS2022 option"
+    if ($VS2017.IsPresent + $VS2019.IsPresent + $VS2022.IsPresent + $VS2026.IsPresent -Eq 0) {
+        Write-Error "Error: Must specify either -VS2017, -VS2019, -VS2022, or -VS2026 option"
         Exit 3
-    } elseif ($VS2017.IsPresent + $VS2019.IsPresent + $VS2022.IsPresent -Gt 1) {
-        Write-Error "Error: Cannot specify multiple -VS2017, -VS2019, and -VS2022 options together"
+    } elseif ($VS2017.IsPresent + $VS2019.IsPresent + $VS2022.IsPresent + $VS2026.IsPresent -Gt 1) {
+        Write-Error "Error: Cannot specify multiple -VS2017, -VS2019, VS2022, and -VS2026 options together"
         Exit 3
     } elseif ($VS2017.IsPresent) {
         Write-Output "-VS2017  : Using Visual Studio 2017 installation/update"
@@ -213,6 +216,9 @@ try {
     } elseif ($VS2022.IsPresent) {
         Write-Output "-VS2022  : Using Visual Studio 2022 installation/update"
         ":: Using VS2022" | Out-File -FilePath $rebuild_filename -Append
+    } elseif ($VS2026.IsPresent) {
+        Write-Output "-VS2026  : Using Visual Studio 2026 installation/update"
+        ":: Using VS2026" | Out-File -FilePath $rebuild_filename -Append
     }
 
     if ($Firewall.IsPresent) {
@@ -427,9 +433,9 @@ try {
     ##############################################################################
     # Check for existing VS2017 and required workloads
     #
-    Write-Output "Checking for existing VS2017 15.9, VS2019 16.11, or VS2022 17.14 required workloads ..."
+    Write-Output "Checking for existing VS2017 15.9, VS2019 16.11, VS2022 17.14, or VS2026 18.0 required workloads ..."
     Write-Output ""
-    WriteGreenOutput "Note: Visual Studio 2017, 2019, and 2022 will peacefully coexist."
+    WriteGreenOutput "Note: Visual Studio 2017, 2019, 2022, and 2026 will peacefully coexist."
     Write-Output ""
 
     # From:
@@ -499,14 +505,35 @@ try {
         'Microsoft.VisualStudio.Component.Git', `
         'Microsoft.VisualStudio.Component.WinXP'
 
+    $workloads_2026 = `
+        'Microsoft.VisualStudio.ComponentGroup.NativeDesktop.Core', `
+        'Microsoft.VisualStudio.ComponentGroup.WebToolsExtensions.CMake', `
+        'Microsoft.VisualStudio.Workload.CoreEditor', `
+        'Microsoft.VisualStudio.Workload.NativeDesktop', `
+        'Microsoft.VisualStudio.Component.CoreEditor', `
+        'Microsoft.VisualStudio.Component.Roslyn.Compiler', `
+        'Microsoft.Component.MSBuild', `
+        'Microsoft.VisualStudio.Component.TextTemplating', `
+        'Microsoft.VisualStudio.Component.Debugger.JustInTime', `
+        'Microsoft.VisualStudio.Component.VC.CoreIde', `
+        'Microsoft.VisualStudio.Component.VC.Tools.x86.x64', `
+        'Microsoft.VisualStudio.Component.Windows10SDK.19041', `
+        'Microsoft.VisualStudio.Component.VC.Redist.14.Latest', `
+        'Microsoft.VisualStudio.Component.VC.CMake.Project', `
+        'Microsoft.Component.VC.Runtime.UCRTSDK', `
+        'Microsoft.VisualStudio.Component.Git', `
+        'Microsoft.VisualStudio.Component.WinXP'
+
     if ($VS2017.IsPresent) {
         $workloads = $workloads_2017
     } elseif ($VS2019.IsPresent) {
         $workloads = $workloads_2019
     } elseif ($VS2022.IsPresent) {
         $workloads = $workloads_2022
+    } elseif ($VS2026.IsPresent) {
+        $workloads = $workloads_2026
     } else {
-        Write-Error "Error: Inconsistent VS2017/VS2019/VS2022 options"
+        Write-Error "Error: Inconsistent VS2017/VS2019/VS2022/VS2026 options"
         Exit 3
     }
 
@@ -515,16 +542,19 @@ try {
     $vs_2017_missing = $false
     $vs_2019_missing = $false
     $vs_2022_missing = $false
+    $vs_2026_missing = $false
     foreach ($workload in $workloads)
     {
         $vs2017_found = $false
         $vs2019_found = $false
         $vs2022_found = $false
+        $vs2026_found = $false
         $workload_2017_found = $false
         $workload_2019_found = $false
         $workload_2022_found = $false
+        $workload_2026_found = $false
 
-        $found = (Get-VSSetupInstance -All | Select-VSSetupInstance -Require "$workload" -Version '[15.9,)')
+        $found = (Get-VSSetupInstance -All -Prerelease | Select-VSSetupInstance -Require "$workload" -Version '[15.9,)')
 
         if ($found -eq $null) {
             WriteCustomOutput -ForegroundColor Yellow -BackgroundColor Black -Message `
@@ -532,10 +562,11 @@ try {
             $vs_2017_missing = $true
             $vs_2019_missing = $true
             $vs_2022_missing = $true
+            $vs_2026_missing = $true
         } else {
             foreach ($f in $found) {
-                # echo $workload
-                # echo $f.InstallationVersion.ToString()
+                echo $workload
+                echo $f.InstallationVersion.ToString()
 
                 $ff = $f.InstallationVersion.ToString() 
                 Write-Output "$ff : $workload"
@@ -552,6 +583,10 @@ try {
                     # Write-Output "17.14 version found"
                     $workload_2022_found = $true
                     $vs2022_found = $true
+                } elseif ($ff.StartsWith('18.0')) {
+                    # Write-Output "18.0 version found"
+                    $workload_2026_found = $true
+                    $vs2026_found = $true
                 } else {
                     # Write-Output "not            : VS2017 15.9, VS2019 16.11, or VS2022 17.14 version"
                 }
@@ -574,6 +609,12 @@ try {
                 WriteCustomOutput -ForegroundColor Yellow -BackgroundColor Black -Message `
                     "missing VS2022 17.14 : $workload"
             }
+
+            if ($VS2026.IsPresent -And !$workload_2026_found) {
+                $vs_2026_missing = $true
+                WriteCustomOutput -ForegroundColor Yellow -BackgroundColor Black -Message `
+                    "missing VS2026 18.0 : $workload"
+            }
         }
     }
 
@@ -594,6 +635,12 @@ try {
         Write-Output "Some required VS2022 workloads are missing, and can be automatically installed."
     } elseif ($VS2022.IsPresent) {
         WriteGreenOutput "All required VS2022 workloads are present."
+    }
+
+    if ($VS2026.IsPresent -And $vs_2026_missing) {
+        Write-Output "Some required VS2026 workloads are missing, and can be automatically installed."
+    } elseif ($VS2026.IsPresent) {
+        WriteGreenOutput "All required VS2026 workloads are present."
     }
     Write-Output ""
 
@@ -653,6 +700,26 @@ try {
           cmd /c .\vs_community.exe --passive --norestart --wait
         popd
         Write-Output ""
+    } elseif ($vs_2026_missing -And $VS2026.IsPresent -And !$SkipVS.IsPresent) {
+        Write-Output "==> Create/update VS2026 installer (this will take some time)"
+        if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
+
+        # Create an offline installer for Visual Studio 2026
+        .\create-vs2026-offline.ps1
+        Write-Output ""
+
+        Write-Output "==> VS2026 will require updating.  Ctrl+C now if you don't want that."
+
+        pushd .\vs2026offline\
+          Write-Output "==> Run VS2026 installer to update (this will take some time)"
+          if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
+          cmd /c .\vs_community.exe update --passive --norestart --wait
+
+          Write-Output "==> Run VS2026 installer to add missing workloads (this will take some time)"
+          if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
+          cmd /c .\vs_community.exe --passive --norestart --wait
+        popd
+        Write-Output ""
     } else {
         Write-Output "Skipping Visual Studio installer"
         Write-Output ""
@@ -701,8 +768,17 @@ try {
 #            Write-Output "==> Found vcvars64.bat on drive D:"
 #            $vcvars_cmd = "$vcvars_d_cmd"
 #        }
+    } elseif ($VS2026.IsPresent) {
+        $vcver = "2026"
+        Write-Output "==> Creating VS$vcver user property directory if missing"
+
+        Write-Output "Looking for VCVARS$bitness.BAT via $CpuArch*Native*$vcver.lnk shortcut search"
+        $vcvars = FindVCVARS 'x64*Native*VS 18*.lnk'
+        Write-Output "Found VCVARS$bitness.BAT file : $vcvars"
+        $vcvars_cmd = "$vcvars"
+        $vcvars_cmd = $vcvars_cmd.Replace("`"","")
     } else {
-        Write-Error "Error: Inconsistent VS2017/VS2019/VS2022 options"
+        Write-Error "Error: Inconsistent VS2017/VS2019/VS2022/VS2026 options"
         Exit 3
     }
 
