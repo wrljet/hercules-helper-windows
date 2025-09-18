@@ -713,11 +713,11 @@ try {
         pushd .\vs2026offline\
           Write-Output "==> Run VS2026 installer to update (this will take some time)"
           if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
-          cmd /c .\vs_community.exe update --passive --norestart --wait
+          cmd /c .\vs_Community.exe update --passive --norestart --wait
 
           Write-Output "==> Run VS2026 installer to add missing workloads (this will take some time)"
           if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
-          cmd /c .\vs_community.exe --passive --norestart --wait
+          cmd /c .\vs_Community.exe --passive --norestart --wait
         popd
         Write-Output ""
     } else {
