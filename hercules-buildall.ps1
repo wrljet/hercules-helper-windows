@@ -1,7 +1,7 @@
 # hercules-buildall.ps1 -- Part of Hercules-Helper
 #
 # Hercules builder
-# Updated: 11 SEP 2025
+# Updated: 15 OCT 2025
 #
 # The most recent version of this project can be obtained with:
 #   git clone https://github.com/wrljet/hercules-helper-windows.git
@@ -416,14 +416,20 @@ try {
     Write-Output ""
 
     # Write-Output "wmic os get osarchitecture"
-    if ((Get-WmiObject Win32_OperatingSystem | Select-Object OSArchitecture) -match "32") {
+    # Assume we found 64-bit system
+    $bitness = 64
+    $CpuArch = "x64"
+
+    if ([System.Version]$ver -lt [System.Version]"7.0.0.0") {
+        if ((Get-WmiObject Win32_OperatingSystem | Select-Object OSArchitecture) -match "32") {
+            # Write-Output "found 32-bit system"
+            $bitness = 32
+            $CpuArch = "x86"
+        }
+    } elseif ((Get-CimInstance Win32_OperatingSystem | Select-Object OSArchitecture) -match "32") {
         # Write-Output "found 32-bit system"
         $bitness = 32
         $CpuArch = "x86"
-    } else {
-        # Write-Output "found 64-bit system"
-        $bitness = 64
-        $CpuArch = "x64"
     }
 
     Write-Output ""
