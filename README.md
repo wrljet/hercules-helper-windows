@@ -32,7 +32,7 @@ PowerShell 5.1 and VS2017)
 
 This PowerShell script will perform a complete build of Hercules and its external
 packages, and run all the automated tests.  It will also install Visual Studio
-2017, 2019, or 2022 (17.11), or update an existing Visual Studio installation to add only
+2017, 2019, 2022, or 2026, or update an existing Visual Studio installation to add only
 any require workloads that are missing.
 
 The full process is:
@@ -161,6 +161,9 @@ to allow Hercules will be added.
 
 ```-NoPrompt``` will skip the 'Press return to continue' prompts
 except for overwriting an existing repo.  Thank you to Ross Patterson for this feature.
+
+If the ```-DebugInfo``` option is specified debugging information
+will be output along the way.
 
 From here on everything should be completely automatic.
 

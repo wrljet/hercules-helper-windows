@@ -1,7 +1,7 @@
 # hercules-buildall.ps1 -- Part of Hercules-Helper
 #
 # Hercules builder
-# Updated: 15 OCT 2025
+# Updated: 13 NOV 2025
 #
 # The most recent version of this project can be obtained with:
 #   git clone https://github.com/wrljet/hercules-helper-windows.git
@@ -75,12 +75,16 @@ Param (
     [Switch]$ColorText,
 
     [Parameter(Mandatory = $false)]
-    [Switch]$NoPrompt)
+    [Switch]$NoPrompt,
+
+    [Parameter(Mandatory = $false)]
+    [Switch]$DebugInfo
+)
 
 ##############################################################################
 #
 
-$DebugInfo = $false
+# $DebugInfo = $false
 
 $goodies_dir = ".\goodies"
 $goodies_dir = Resolve-Path "$goodies_dir"
@@ -115,7 +119,6 @@ Function WriteGreenOutput($message)
 
 Function FindVCVARS($pattern)
 {
-
 if ($DebugInfo) { Write-Output "FindVCVARS(): pattern: $pattern" | out-host }
 
 # $link = Get-ChildItem -Path "C:\ProgramData\Microsoft\Windows\Start Menu" -Recurse -File -Filter "x64*Native*2022.lnk"
@@ -199,6 +202,11 @@ try {
     # Process Visual Studio related options
     if ($SkipVS.IsPresent) {
         Write-Output "-SkipVS: Skipping Visual Studio installation/update"
+    }
+
+    if ($DebugInfo.IsPresent) {
+        Write-Output "-DebugInfo: Print debug info"
+        ":: DebugInfo = yes" | Out-File -FilePath $rebuild_filename -Append
     }
 
     if ($VS2017.IsPresent + $VS2019.IsPresent + $VS2022.IsPresent + $VS2026.IsPresent -Eq 0) {
@@ -512,21 +520,32 @@ try {
         'Microsoft.VisualStudio.Component.WinXP'
 
     $workloads_2026 = `
-        'Microsoft.VisualStudio.ComponentGroup.NativeDesktop.Core', `
-        'Microsoft.VisualStudio.ComponentGroup.WebToolsExtensions.CMake', `
-        'Microsoft.VisualStudio.Workload.CoreEditor', `
-        'Microsoft.VisualStudio.Workload.NativeDesktop', `
         'Microsoft.VisualStudio.Component.CoreEditor', `
+        'Microsoft.VisualStudio.Workload.CoreEditor', `
         'Microsoft.VisualStudio.Component.Roslyn.Compiler', `
         'Microsoft.Component.MSBuild', `
         'Microsoft.VisualStudio.Component.TextTemplating', `
+        'Microsoft.VisualStudio.Component.DiagnosticTools', `
+        'Microsoft.VisualStudio.Component.IntelliCode', `
         'Microsoft.VisualStudio.Component.Debugger.JustInTime', `
         'Microsoft.VisualStudio.Component.VC.CoreIde', `
+        'Microsoft.VisualStudio.Component.VC.14.44.17.14.x86.x64', `
         'Microsoft.VisualStudio.Component.VC.Tools.x86.x64', `
-        'Microsoft.VisualStudio.Component.Windows10SDK.19041', `
+        'Microsoft.VisualStudio.Component.Graphics.Tools', `
+        'Microsoft.VisualStudio.Component.VC.DiagnosticTools', `
+        'Microsoft.VisualStudio.Component.Windows11SDK.26100', `
+        'Microsoft.VisualStudio.Component.VC.14.44.17.14.ATL', `
+        'Microsoft.VisualStudio.Component.VC.ATL', `
         'Microsoft.VisualStudio.Component.VC.Redist.14.Latest', `
+        'Microsoft.VisualStudio.ComponentGroup.NativeDesktop.Core', `
+        'Microsoft.VisualStudio.Component.Windows11Sdk.WindowsPerformanceToolkit', `
+        'Microsoft.VisualStudio.Component.CppBuildInsights', `
+        'Microsoft.VisualStudio.ComponentGroup.WebToolsExtensions.CMake', `
         'Microsoft.VisualStudio.Component.VC.CMake.Project', `
+        'Microsoft.VisualStudio.Component.Vcpkg', `
+        'Microsoft.VisualStudio.Component.VC.v141.x86.x64', `
         'Microsoft.Component.VC.Runtime.UCRTSDK', `
+        'Microsoft.VisualStudio.Workload.NativeDesktop', `
         'Microsoft.VisualStudio.Component.Git', `
         'Microsoft.VisualStudio.Component.WinXP'
 
@@ -717,13 +736,15 @@ try {
         Write-Output "==> VS2026 will require updating.  Ctrl+C now if you don't want that."
 
         pushd .\vs2026offline\
+          Copy-Item '..\vs_community.exe' -destination .
+
           Write-Output "==> Run VS2026 installer to update (this will take some time)"
           if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
-          cmd /c .\vs_Community.exe update --passive --norestart --wait
+          cmd /c .\vs_community.exe update --passive --norestart --wait
 
           Write-Output "==> Run VS2026 installer to add missing workloads (this will take some time)"
           if (!$NoPrompt) { $input = Read-Host -Prompt 'Press return to continue' }
-          cmd /c .\vs_Community.exe --passive --norestart --wait
+          cmd /c .\vs_community.exe --passive --norestart --wait
         popd
         Write-Output ""
     } else {
@@ -779,7 +800,9 @@ try {
         Write-Output "==> Creating VS$vcver user property directory if missing"
 
         Write-Output "Looking for VCVARS$bitness.BAT via $CpuArch*Native*$vcver.lnk shortcut search"
-        $vcvars = FindVCVARS 'x64*Native*VS 18*.lnk'
+#       $vcvars = FindVCVARS 'x64*Native*VS 18*.lnk'
+# C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Visual Studio 2026\Visual Studio Tools\VC\x64 Native Tools Command Prompt for VS.lnk
+        $vcvars = FindVCVARS 'x64*Native*VS.lnk'
         Write-Output "Found VCVARS$bitness.BAT file : $vcvars"
         $vcvars_cmd = "$vcvars"
         $vcvars_cmd = $vcvars_cmd.Replace("`"","")
@@ -804,7 +827,6 @@ try {
     if (!(Test-Path -Path "$props_dir\Microsoft.Cpp.x64.user.props" -PathType leaf )) {
         try {
             Write-Output "Creating missing $props_dir\Microsoft.Cpp.x64.user.props"
-            Copy-Item '.\goodies\Microsoft.Cpp.x64.user.props' -destination "$props_dir"
         } catch {
             throw $_.Exception.Message
         }
