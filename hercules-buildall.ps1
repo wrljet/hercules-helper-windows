@@ -1,7 +1,7 @@
 # hercules-buildall.ps1 -- Part of Hercules-Helper
 #
 # Hercules builder
-# Updated: 13 NOV 2025
+# Updated: 07 NOV 2026
 #
 # The most recent version of this project can be obtained with:
 #   git clone https://github.com/wrljet/hercules-helper-windows.git
@@ -117,12 +117,12 @@ Function WriteGreenOutput($message)
     }
 }
 
-Function FindVCVARS($pattern)
+Function FindVCVARS($lnk_pattern, $bat_pattern)
 {
-if ($DebugInfo) { Write-Output "FindVCVARS(): pattern: $pattern" | out-host }
+if ($DebugInfo) { Write-Output "FindVCVARS(): lnk_pattern: $lnk_pattern, bat_pattern: $bat_pattern" | out-host }
 
 # $link = Get-ChildItem -Path "C:\ProgramData\Microsoft\Windows\Start Menu" -Recurse -File -Filter "x64*Native*2022.lnk"
-    $link = Get-ChildItem -Path "C:\ProgramData\Microsoft\Windows\Start Menu" -Recurse -File -Filter $pattern
+    $link = Get-ChildItem -Path "C:\ProgramData\Microsoft\Windows\Start Menu" -Recurse -File -Filter $lnk_pattern
 
 # C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Visual Studio 2022\Visual Studio Tools\VC\x64 Native Tools Command Prompt for VS 2022.lnk
 
@@ -447,7 +447,7 @@ try {
     ##############################################################################
     # Check for existing VS2017 and required workloads
     #
-    Write-Output "Checking for existing VS2017 15.9, VS2019 16.11, VS2022 17.14, or VS2026 18.0 required workloads ..."
+    Write-Output "Checking for existing VS2017 15.9, VS2019 16.11, VS2022 17.14, or VS2026 18.11 required workloads ..."
     Write-Output ""
     WriteGreenOutput "Note: Visual Studio 2017, 2019, 2022, and 2026 will peacefully coexist."
     Write-Output ""
@@ -520,23 +520,41 @@ try {
         'Microsoft.VisualStudio.Component.WinXP'
 
     $workloads_2026 = `
-        'Microsoft.VisualStudio.Component.CoreEditor', `
-        'Microsoft.VisualStudio.Workload.CoreEditor', `
-        'Microsoft.VisualStudio.Component.Roslyn.Compiler', `
+#        'Microsoft.VisualStudio.Component.CoreEditor', `
+#        'Microsoft.VisualStudio.Workload.CoreEditor', `
+#        'Microsoft.VisualStudio.Component.Roslyn.Compiler', `
+#        'Microsoft.Component.MSBuild', `
+#        'Microsoft.VisualStudio.Component.TextTemplating', `
+#        'Microsoft.VisualStudio.Component.DiagnosticTools', `
+#        'Microsoft.VisualStudio.Component.Debugger.JustInTime', `
+#        'Microsoft.VisualStudio.Component.VC.CoreIde', `
+#        'Microsoft.VisualStudio.Component.VC.Tools.x86.x64', `
+#        'Microsoft.VisualStudio.Component.Windows11SDK.26100', `
+#        'Microsoft.VisualStudio.Component.VC.Redist.14.Latest', `
+#        'Microsoft.VisualStudio.ComponentGroup.NativeDesktop.Core', `
+#        'Microsoft.VisualStudio.ComponentGroup.WebToolsExtensions.CMake', `
+#        'Microsoft.Component.VC.Runtime.UCRTSDK', `
+#        'Microsoft.VisualStudio.Workload.NativeDesktop', `
+#        'Microsoft.VisualStudio.Component.Git', `
+#        'Microsoft.VisualStudio.Component.WinXP'
+
         'Microsoft.Component.MSBuild', `
-        'Microsoft.VisualStudio.Component.TextTemplating', `
-        'Microsoft.VisualStudio.Component.DiagnosticTools', `
+        'Microsoft.VisualStudio.Component.CoreEditor', `
         'Microsoft.VisualStudio.Component.Debugger.JustInTime', `
+        'Microsoft.VisualStudio.Component.Git', `
+        'Microsoft.VisualStudio.Component.IntelliCode', `
+        'Microsoft.VisualStudio.Component.NuGet', `
+        'Microsoft.VisualStudio.Component.Roslyn.Compiler', `
+        'Microsoft.VisualStudio.Component.TextTemplating', `
+        'Microsoft.VisualStudio.Component.VC.CMake.Project', `
         'Microsoft.VisualStudio.Component.VC.CoreIde', `
+        'Microsoft.VisualStudio.Component.VC.Redist.14.Latest', `
         'Microsoft.VisualStudio.Component.VC.Tools.x86.x64', `
         'Microsoft.VisualStudio.Component.Windows11SDK.26100', `
-        'Microsoft.VisualStudio.Component.VC.Redist.14.Latest', `
         'Microsoft.VisualStudio.ComponentGroup.NativeDesktop.Core', `
         'Microsoft.VisualStudio.ComponentGroup.WebToolsExtensions.CMake', `
-        'Microsoft.Component.VC.Runtime.UCRTSDK', `
-        'Microsoft.VisualStudio.Workload.NativeDesktop', `
-        'Microsoft.VisualStudio.Component.Git', `
-        'Microsoft.VisualStudio.Component.WinXP'
+        'Microsoft.VisualStudio.Workload.CoreEditor', `
+        'Microsoft.VisualStudio.Workload.NativeDesktop'
 
     if ($VS2017.IsPresent) {
         $workloads = $workloads_2017
@@ -597,8 +615,8 @@ try {
                     # Write-Output "17.14 version found"
                     $workload_2022_found = $true
                     $vs2022_found = $true
-                } elseif ($ff.StartsWith('18.0')) {
-                    # Write-Output "18.0 version found"
+                } elseif ($ff.StartsWith('18.11')) {
+                    # Write-Output "18.11 version found"
                     $workload_2026_found = $true
                     $vs2026_found = $true
                 } else {
@@ -627,7 +645,7 @@ try {
             if ($VS2026.IsPresent -And !$workload_2026_found) {
                 $vs_2026_missing = $true
                 WriteCustomOutput -ForegroundColor Yellow -BackgroundColor Black -Message `
-                    "missing VS2026 18.0 : $workload"
+                    "missing VS2026 18.11 : $workload"
             }
         }
     }
@@ -760,7 +778,7 @@ try {
 
         Write-Output "Looking for VCVARS$bitness.BAT via $CpuArch*Native*$vcver.lnk shortcut search"
         # Write-Output ("$CpuArch" + '*Native*2019.lnk')
-        $vcvars = FindVCVARS ("$CpuArch" + '*Native*2019.lnk')
+        $vcvars = FindVCVARS "$CpuArch" + '*Native*2019.lnk' 'VCVARS$bitness.BAT'
         Write-Output "Found VCVARS$bitness.BAT file : $vcvars"
         $vcvars_cmd = "$vcvars"
         $vcvars_cmd = $vcvars_cmd.Replace("`"","")
@@ -769,7 +787,7 @@ try {
         Write-Output "==> Creating VS$vcver user property directory if missing"
 
         Write-Output "Looking for VCVARS$bitness.BAT via $CpuArch*Native*$vcver.lnk shortcut search"
-        $vcvars = FindVCVARS 'x64*Native*2022.lnk'
+        $vcvars = FindVCVARS 'x64*Native*2022.lnk' 'VCVARS$bitness.BAT'
         Write-Output "Found VCVARS$bitness.BAT file : $vcvars"
         $vcvars_cmd = "$vcvars"
         $vcvars_cmd = $vcvars_cmd.Replace("`"","")
@@ -791,8 +809,8 @@ try {
         Write-Output "Looking for VCVARS$bitness.BAT via $CpuArch*Native*$vcver.lnk shortcut search"
 #       $vcvars = FindVCVARS 'x64*Native*VS 18*.lnk'
 # C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Visual Studio 2026\Visual Studio Tools\VC\x64 Native Tools Command Prompt for VS.lnk
-        $vcvars = FindVCVARS 'x64*Native*VS.lnk'
-        Write-Output "Found VCVARS$bitness.BAT file : $vcvars"
+        $vcvars = FindVCVARS 'Developer Command Prompt for VS.lnk' 'VsDevCmd.bat'
+        Write-Output "Found Developer Command Prompt for VS.lnk file : $vcvars"
         $vcvars_cmd = "$vcvars"
         $vcvars_cmd = $vcvars_cmd.Replace("`"","")
     } else {
